@@ -69,3 +69,29 @@ fn test_to_string() {
     buffer.write_string("hello");
     assert_eq!(buffer.to_string(), "0x00 0x00 0x00 0x05 0x68 0x65 0x6c 0x6c 0x6f");
 }
+
+
+#[test]
+fn test_wpos() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u32(0);
+    buffer.set_wpos(1);
+    buffer.write_u8(0xFF);
+    buffer.write_u8(0x11);
+    assert_eq!(buffer.read_u32(), 0x00FF1100);
+}
+
+#[test]
+fn test_rpos() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u32(0x0000FF00);
+    buffer.set_rpos(2);
+    assert_eq!(buffer.read_u8(), 0xFF);
+}
+
+#[test]
+fn test_to_bytes() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    assert_eq!(buffer.to_bytes(), vec![0xFF]);
+}

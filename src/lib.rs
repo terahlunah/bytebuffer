@@ -192,5 +192,25 @@ impl ByteBuffer {
         str
     }
 
+    pub fn get_rpos(&self) -> usize {
+        self.rpos
+    }
+
+    pub fn set_rpos(&mut self, rpos : usize) {
+        self.rpos = std::cmp::min(rpos, self.data.len());
+    }
+
+    pub fn get_wpos(&self) -> usize {
+        self.wpos
+    }
+
+    pub fn set_wpos(&mut self, wpos : usize) {
+        self.wpos = std::cmp::min(wpos, self.data.len());
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.data.to_vec()
+    }
+
 }
 
