@@ -19,6 +19,12 @@ impl ByteBuffer {
         }
     }
 
+    pub fn from_bytes(bytes : &[u8]) -> ByteBuffer {
+        let mut buffer = ByteBuffer::new();
+        buffer.write_bytes(bytes);
+        buffer
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
@@ -38,15 +44,15 @@ impl ByteBuffer {
 
     // Write operations
 
-    pub fn write_bytes(&mut self, array : &[u8]) {
+    pub fn write_bytes(&mut self, bytes : &[u8]) {
 
-        let size = array.len() + self.wpos;
+        let size = bytes.len() + self.wpos;
 
         if size > self.data.len() {
             self.resize(size);
         }
 
-        for v in array {
+        for v in bytes {
             self.data[self.wpos] = *v;
             self.wpos += 1;
         }

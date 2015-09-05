@@ -95,3 +95,9 @@ fn test_to_bytes() {
     buffer.write_u8(0xFF);
     assert_eq!(buffer.to_bytes(), vec![0xFF]);
 }
+
+#[test]
+fn test_from_bytes() {
+    let mut buffer = ByteBuffer::from_bytes(&vec![1, 2]);
+    assert_eq!(buffer.read_u8() + buffer.read_u8(), 3);
+}
