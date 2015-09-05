@@ -2,3 +2,6 @@
 name = "bytebuffer"
 version = "0.1.0"
 authors = ["Terah <terah.dev@gmail.com>"]
+
+[dependencies]
+byteorder = "0.3"
