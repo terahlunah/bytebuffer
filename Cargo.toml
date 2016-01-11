@@ -2,11 +2,11 @@
 name = "bytebuffer"
 version = "0.1.0"
 authors = ["Terah <terah.dev@gmail.com>"]
-description = "A buffer usefull for networking and binary protocols"
+description = "A byte buffer for networking and binary protocols"
 homepage = "https://github.com/Terah-/rust-bytebuffer"
 repository = "https://github.com/Terah-/rust-bytebuffer"
 keywords = ["byte", "buffer", "network", "protocol"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 byteorder = "0.3"
