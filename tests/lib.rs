@@ -101,3 +101,54 @@ fn test_from_bytes() {
     let mut buffer = ByteBuffer::from_bytes(&vec![1, 2]);
     assert_eq!(buffer.read_u8() + buffer.read_u8(), 3);
 }
+
+#[test]
+fn test_read_bit() {
+    let mut buffer = ByteBuffer::from_bytes(&vec![128]);
+    let bit1 = buffer.read_bit();
+    assert_eq!(bit1, true);
+    let bit2 = buffer.read_bit();
+    assert_eq!(bit2, false);
+
+}
+
+#[test]
+fn test_read_bits() {
+    let mut buffer = ByteBuffer::from_bytes(&vec![128]);
+    let value = buffer.read_bits(3);
+    assert_eq!(value, 4);
+}
+
+#[test]
+fn test_write_bit() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_bit(true);
+    buffer.write_bit(true);
+    buffer.write_bit(false);
+    assert_eq!(buffer.to_bytes()[0], 128 + 64);
+}
+
+#[test]
+fn test_write_bits() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_bits(6, 3); // 110b
+    assert_eq!(buffer.to_bytes()[0], 128 + 64);
+}
+
+#[test]
+fn test_flush_bit() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_bit(true);
+    buffer.write_i8(1);
+
+    let buffer_result_1 = buffer.to_bytes();
+    assert_eq!(buffer_result_1[0], 128);
+    assert_eq!(buffer_result_1[1], 1);
+
+    let mut buffer2 = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
+    let bit1 = buffer2.read_bit();
+    let number1 = buffer2.read_i8();
+
+    assert_eq!(bit1, true);
+    assert_eq!(number1, 1);
+}

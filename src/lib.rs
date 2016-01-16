@@ -7,15 +7,19 @@ pub struct ByteBuffer {
     data : Vec<u8>,
     wpos : usize,
     rpos : usize,
+    rbit: usize,
+    wbit: usize,
 }
 
 impl ByteBuffer {
 
     pub fn new() -> ByteBuffer {
-        ByteBuffer { 
+        ByteBuffer {
             data : vec![],
             wpos : 0,
-            rpos : 0 
+            rpos : 0,
+            rbit: 0,
+            wbit: 0,
         }
     }
 
@@ -45,7 +49,8 @@ impl ByteBuffer {
     // Write operations
 
     pub fn write_bytes(&mut self, bytes : &[u8]) {
-
+        self.flush_bit();
+        
         let size = bytes.len() + self.wpos;
 
         if size > self.data.len() {
@@ -116,6 +121,7 @@ impl ByteBuffer {
     // Read operations
 
     pub fn read_bytes(&mut self, size : usize) -> Vec<u8> {
+        self.flush_bit();
         assert!(self.rpos + size <= self.data.len());
         let range = self.rpos..self.rpos+size;
         let mut res = Vec::<u8>::new();
@@ -125,6 +131,7 @@ impl ByteBuffer {
     }
 
     pub fn read_u8(&mut self) -> u8 {
+        self.flush_bit();
         assert!(self.rpos < self.data.len());
         let pos = self.rpos;
         self.rpos += 1;
@@ -136,6 +143,7 @@ impl ByteBuffer {
     }
 
     pub fn read_u16(&mut self) -> u16 {
+        self.flush_bit();
         assert!(self.rpos + 2 <= self.data.len());
         let range = self.rpos..self.rpos+2;
         self.rpos += 2;
@@ -147,6 +155,7 @@ impl ByteBuffer {
     }
 
     pub fn read_u32(&mut self) -> u32 {
+        self.flush_bit();
         assert!(self.rpos + 4 <= self.data.len());
         let range = self.rpos..self.rpos+4;
         self.rpos += 4;
@@ -158,6 +167,7 @@ impl ByteBuffer {
     }
 
     pub fn read_u64(&mut self) -> u64 {
+        self.flush_bit();
         assert!(self.rpos + 8 <= self.data.len());
         let range = self.rpos..self.rpos+8;
         self.rpos += 8;
@@ -169,6 +179,7 @@ impl ByteBuffer {
     }
 
     pub fn read_f32(&mut self) -> f32 {
+        self.flush_bit();
         assert!(self.rpos + 4 <= self.data.len());
         let range = self.rpos..self.rpos+4;
         self.rpos += 4;
@@ -176,6 +187,7 @@ impl ByteBuffer {
     }
 
     pub fn read_f64(&mut self) -> f64 {
+        self.flush_bit();
         assert!(self.rpos + 8 <= self.data.len());
         let range = self.rpos..self.rpos+8;
         self.rpos += 8;
@@ -218,5 +230,65 @@ impl ByteBuffer {
         self.data.to_vec()
     }
 
-}
+    //Bit manipulation functions
 
+    pub fn read_bit(&mut self) -> bool {
+        assert!(self.rpos <= self.data.len());
+        let bit = self.data[self.rpos] & (1 << 7 - self.rbit) != 0;
+        self.rbit += 1;
+        if self.rbit > 7 {
+            self.rbit = 0;
+            self.rpos += 1;
+        }
+        bit
+    }
+
+    pub fn read_bits(&mut self, n : u8) -> u64 {
+        if n > 0 {
+            ((if self.read_bit() {1} else {0}) << n-1) | self.read_bits(n-1)
+        }
+        else {
+            0
+        }
+    }
+
+    pub fn flush_bit(&mut self) {
+        if self.rbit > 0 {
+            self.rpos += 1;
+            self.rbit = 0
+        }
+
+        if self.wbit > 0 {
+            self.wpos += 1;
+            self.wbit = 0
+        }
+    }
+
+    pub fn write_bit(&mut self, bit: bool) {
+        let size = self.wpos + 1;
+        if size > self.data.len() {
+            self.resize(size);
+        }
+
+        if bit {
+            self.data[self.wpos] |= 1 << (7 - self.wbit);
+        }
+
+        self.wbit += 1;
+
+        if self.wbit > 7 {
+            self.wbit = 0;
+            self.wpos += 1;
+        }
+    }
+
+    pub fn write_bits(&mut self, value: u64, n: u8) {
+        if n > 0 {
+            self.write_bit((value >> n-1) & 1 != 0);
+            self.write_bits(value, n-1);
+        }
+        else {
+            self.write_bit((value & 1) != 0);
+        }
+    }
+}
