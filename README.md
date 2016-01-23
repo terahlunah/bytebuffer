@@ -1,5 +1,10 @@
 [![Build Status](https://travis-ci.org/Terah-/rust-bytebuffer.svg)](https://travis-ci.org/Terah-/rust-bytebuffer)
 
+
+## Documentation
+
+[Full Documentation Here !](http://terah-.github.io/rust-bytebuffer/bytebuffer/struct.ByteBuffer.html)
+
 ## License
 
 Licensed under either of
