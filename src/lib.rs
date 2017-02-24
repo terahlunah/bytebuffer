@@ -1,7 +1,7 @@
 extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian};
-use std::io::Write;
+use std::io::{Read, Write, Result};
 
 /// A byte buffer object specifically turned to easily read and write binary values
 pub struct ByteBuffer {
@@ -482,5 +482,29 @@ impl ByteBuffer {
         } else {
             self.write_bit((value & 1) != 0);
         }
+    }
+}
+
+impl Read for ByteBuffer {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
+        self.flush_bit();
+        let read_len = std::cmp::min(self.data.len() - self.rpos, buf.len());
+        let range = self.rpos..self.rpos + read_len;
+        for (i, val) in (&self.data[range]).iter().enumerate() {
+            buf[i] = *val;
+        }
+        self.rpos += buf.len();
+        Ok(read_len)
+    }
+}
+
+impl Write for ByteBuffer {
+    fn write(&mut self, buf: &[u8]) -> Result<usize> {
+        self.write_bytes(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        Ok(())
     }
 }

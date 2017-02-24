@@ -1,6 +1,7 @@
 extern crate bytebuffer;
 
 use bytebuffer::*;
+use std::io::{Read, Write};
 
 #[test]
 fn test_empty() {
@@ -150,4 +151,44 @@ fn test_flush_bit() {
 
     assert_eq!(bit1, true);
     assert_eq!(number1, 1);
+}
+
+#[test]
+fn test_read_empty_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [];
+    buffer.read(&mut res).unwrap();
+}
+
+#[test]
+fn test_read_exact_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 1];
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+}
+
+#[test]
+fn test_read_larger_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 2];
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+    assert_eq!(res[1], 0);
+}
+
+#[test]
+fn test_write() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write(&[0x1, 0xFF, 0x45]).unwrap();
+    assert_eq!(buffer.read_bytes(3), &[0x1, 0xFF, 0x45]);
+}
+
+#[test]
+fn test_flush() {
+    let mut buffer = ByteBuffer::new();
+    buffer.flush().unwrap();
 }
