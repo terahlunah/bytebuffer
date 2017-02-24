@@ -192,3 +192,27 @@ fn test_flush() {
     let mut buffer = ByteBuffer::new();
     buffer.flush().unwrap();
 }
+
+#[test]
+fn test_debug() {
+    let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
+    buffer.read_u8();
+    let debug_string = format!("{:?}", buffer);
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+}
+
+#[test]
+fn test_debug_with_bit_reads() {
+    let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
+    let first_four_bits = buffer.read_bits(4);
+    let debug_string = format!("{:?}", buffer);
+    assert_eq!(buffer.get_rpos(), 0);
+    let next_four_bits = buffer.read_bits(4);
+    assert_eq!(buffer.get_rpos(), 1);
+    let remaining = buffer.read_bits(16);
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+    assert_eq!(first_four_bits, 0);
+    assert_eq!(next_four_bits, 1);
+    assert_eq!(remaining, 65349);
+    assert_eq!(buffer.get_rpos(), 3);
+}

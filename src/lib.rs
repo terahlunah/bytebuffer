@@ -508,3 +508,23 @@ impl Write for ByteBuffer {
         Ok(())
     }
 }
+
+impl std::fmt::Debug for ByteBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let rpos = if self.rbit > 0 {
+            self.rpos + 1
+        } else {
+            self.rpos
+        };
+
+        let read_len = self.data.len() - rpos;
+        let mut remaining_data = vec![0; read_len];
+        let range = rpos..rpos + read_len;
+        for (i, val) in (&self.data[range]).iter().enumerate() {
+            remaining_data[i] = *val;
+        }
+
+        write!(f, "ByteBuffer {{ remaining_data: {:?}, total_data: {:?} }}",
+               remaining_data, self.data)
+    }
+}
