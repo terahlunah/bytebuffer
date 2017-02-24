@@ -5,28 +5,27 @@ use std::io::Write;
 
 /// A byte buffer object specifically turned to easily read and write binary values
 pub struct ByteBuffer {
-    data : Vec<u8>,
-    wpos : usize,
-    rpos : usize,
+    data: Vec<u8>,
+    wpos: usize,
+    rpos: usize,
     rbit: usize,
     wbit: usize,
 }
 
 impl ByteBuffer {
-
     /// Construct a new, empty, ByteBuffer
     pub fn new() -> ByteBuffer {
         ByteBuffer {
-            data : vec![],
-            wpos : 0,
-            rpos : 0,
+            data: vec![],
+            wpos: 0,
+            rpos: 0,
             rbit: 0,
             wbit: 0,
         }
     }
 
     /// Construct a new ByteBuffer filled with the data array.
-    pub fn from_bytes(bytes : &[u8]) -> ByteBuffer {
+    pub fn from_bytes(bytes: &[u8]) -> ByteBuffer {
         let mut buffer = ByteBuffer::new();
         buffer.write_bytes(bytes);
         buffer
@@ -47,7 +46,7 @@ impl ByteBuffer {
     /// Change the buffer size to size.
     ///
     /// _Note_: You cannot shrink a buffer with this method
-    pub fn resize(&mut self, size : usize) {
+    pub fn resize(&mut self, size: usize) {
         let diff = size - self.data.len();
         if diff > 0 {
             self.data.extend(std::iter::repeat(0).take(diff))
@@ -65,7 +64,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_bytes(&vec![0x1, 0xFF, 0x45]); // buffer contains [0x1, 0xFF, 0x45]
     /// ```
-    pub fn write_bytes(&mut self, bytes : &[u8]) {
+    pub fn write_bytes(&mut self, bytes: &[u8]) {
         self.flush_bit();
 
         let size = bytes.len() + self.wpos;
@@ -89,12 +88,12 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_u8(1) // buffer contains [0x1]
     /// ```
-    pub fn write_u8(&mut self, val : u8) {
+    pub fn write_u8(&mut self, val: u8) {
         self.write_bytes(&[val]);
     }
 
     /// Same as `write_u8()` but for signed values
-    pub fn write_i8(&mut self, val : i8) {
+    pub fn write_i8(&mut self, val: i8) {
         self.write_u8(val as u8);
     }
 
@@ -107,14 +106,14 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_u16(1) // buffer contains [0x00, 0x1] if little endian
     /// ```
-    pub fn write_u16(&mut self, val : u16) {
+    pub fn write_u16(&mut self, val: u16) {
         let mut buf = [0; 2];
         BigEndian::write_u16(&mut buf, val);
         self.write_bytes(&buf);
     }
 
     /// Same as `write_u16()` but for signed values
-    pub fn write_i16(&mut self, val : i16) {
+    pub fn write_i16(&mut self, val: i16) {
         self.write_u16(val as u16);
     }
 
@@ -127,14 +126,14 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_u32(1) // buffer contains [0x00, 0x00, 0x00, 0x1] if little endian
     /// ```
-    pub fn write_u32(&mut self, val : u32) {
+    pub fn write_u32(&mut self, val: u32) {
         let mut buf = [0; 4];
         BigEndian::write_u32(&mut buf, val);
         self.write_bytes(&buf);
     }
 
     /// Same as `write_u32()` but for signed values
-    pub fn write_i32(&mut self, val : i32) {
+    pub fn write_i32(&mut self, val: i32) {
         self.write_u32(val as u32);
     }
 
@@ -147,14 +146,14 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_u64(1) // buffer contains [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1] if little endian
     /// ```
-    pub fn write_u64(&mut self, val : u64) {
+    pub fn write_u64(&mut self, val: u64) {
         let mut buf = [0; 8];
         BigEndian::write_u64(&mut buf, val);
         self.write_bytes(&buf);
     }
 
     /// Same as `write_u64()` but for signed values
-    pub fn write_i64(&mut self, val : i64) {
+    pub fn write_i64(&mut self, val: i64) {
         self.write_u64(val as u64);
     }
 
@@ -167,7 +166,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_f32(0.1)
     /// ```
-    pub fn write_f32(&mut self, val : f32) {
+    pub fn write_f32(&mut self, val: f32) {
         let mut buf = [0; 4];
         BigEndian::write_f32(&mut buf, val);
         self.write_bytes(&buf);
@@ -182,7 +181,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_f64(0.1)
     /// ```
-    pub fn write_f64(&mut self, val : f64) {
+    pub fn write_f64(&mut self, val: f64) {
         let mut buf = [0; 8];
         BigEndian::write_f64(&mut buf, val);
         self.write_bytes(&buf);
@@ -199,7 +198,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::new();
     /// buffer.write_string("Hello")
     /// ```
-    pub fn write_string(&mut self, val : &str) {
+    pub fn write_string(&mut self, val: &str) {
         self.write_u32(val.len() as u32);
         self.write_bytes(val.as_bytes());
     }
@@ -207,10 +206,10 @@ impl ByteBuffer {
     // Read operations
 
     /// Read a defined amount of raw bytes. The program crash if not enough bytes are available
-    pub fn read_bytes(&mut self, size : usize) -> Vec<u8> {
+    pub fn read_bytes(&mut self, size: usize) -> Vec<u8> {
         self.flush_bit();
         assert!(self.rpos + size <= self.data.len());
-        let range = self.rpos..self.rpos+size;
+        let range = self.rpos..self.rpos + size;
         let mut res = Vec::<u8>::new();
         res.write(&self.data[range]).unwrap();
         self.rpos += size;
@@ -251,7 +250,7 @@ impl ByteBuffer {
     pub fn read_u16(&mut self) -> u16 {
         self.flush_bit();
         assert!(self.rpos + 2 <= self.data.len());
-        let range = self.rpos..self.rpos+2;
+        let range = self.rpos..self.rpos + 2;
         self.rpos += 2;
         BigEndian::read_u16(&self.data[range])
     }
@@ -273,7 +272,7 @@ impl ByteBuffer {
     pub fn read_u32(&mut self) -> u32 {
         self.flush_bit();
         assert!(self.rpos + 4 <= self.data.len());
-        let range = self.rpos..self.rpos+4;
+        let range = self.rpos..self.rpos + 4;
         self.rpos += 4;
         BigEndian::read_u32(&self.data[range])
     }
@@ -295,7 +294,7 @@ impl ByteBuffer {
     pub fn read_u64(&mut self) -> u64 {
         self.flush_bit();
         assert!(self.rpos + 8 <= self.data.len());
-        let range = self.rpos..self.rpos+8;
+        let range = self.rpos..self.rpos + 8;
         self.rpos += 8;
         BigEndian::read_u64(&self.data[range])
     }
@@ -309,7 +308,7 @@ impl ByteBuffer {
     pub fn read_f32(&mut self) -> f32 {
         self.flush_bit();
         assert!(self.rpos + 4 <= self.data.len());
-        let range = self.rpos..self.rpos+4;
+        let range = self.rpos..self.rpos + 4;
         self.rpos += 4;
         BigEndian::read_f32(&self.data[range])
     }
@@ -318,7 +317,7 @@ impl ByteBuffer {
     pub fn read_f64(&mut self) -> f64 {
         self.flush_bit();
         assert!(self.rpos + 8 <= self.data.len());
-        let range = self.rpos..self.rpos+8;
+        let range = self.rpos..self.rpos + 8;
         self.rpos += 8;
         BigEndian::read_f64(&self.data[range])
     }
@@ -350,7 +349,7 @@ impl ByteBuffer {
 
     /// Set the reading cursor position.
     /// *Note* : Set the reading cursor to `min(newPosition, self.len())` to prevent overflow
-    pub fn set_rpos(&mut self, rpos : usize) {
+    pub fn set_rpos(&mut self, rpos: usize) {
         self.rpos = std::cmp::min(rpos, self.data.len());
     }
 
@@ -361,7 +360,7 @@ impl ByteBuffer {
 
     /// Set the writing cursor position.
     /// *Note* : Set the writing cursor to `min(newPosition, self.len())` to prevent overflow
-    pub fn set_wpos(&mut self, wpos : usize) {
+    pub fn set_wpos(&mut self, wpos: usize) {
         self.wpos = std::cmp::min(wpos, self.data.len());
     }
 
@@ -408,12 +407,11 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::from_bytes(&vec![128]); // 10000000b
     /// let value = buffer.read_bits(3); // value contains 4 (eg: 100b)
     /// ```
-    pub fn read_bits(&mut self, n : u8) -> u64 {
+    pub fn read_bits(&mut self, n: u8) -> u64 {
         // TODO : Assert that n <= 64
         if n > 0 {
-            ((if self.read_bit() {1} else {0}) << n-1) | self.read_bits(n-1)
-        }
-        else {
+            ((if self.read_bit() { 1 } else { 0 }) << n - 1) | self.read_bits(n - 1)
+        } else {
             0
         }
     }
@@ -479,10 +477,9 @@ impl ByteBuffer {
     /// ```
     pub fn write_bits(&mut self, value: u64, n: u8) {
         if n > 0 {
-            self.write_bit((value >> n-1) & 1 != 0);
-            self.write_bits(value, n-1);
-        }
-        else {
+            self.write_bit((value >> n - 1) & 1 != 0);
+            self.write_bits(value, n - 1);
+        } else {
             self.write_bit((value & 1) != 0);
         }
     }

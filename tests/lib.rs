@@ -109,7 +109,6 @@ fn test_read_bit() {
     assert_eq!(bit1, true);
     let bit2 = buffer.read_bit();
     assert_eq!(bit2, false);
-
 }
 
 #[test]
