@@ -493,7 +493,7 @@ impl Read for ByteBuffer {
         for (i, val) in (&self.data[range]).iter().enumerate() {
             buf[i] = *val;
         }
-        self.rpos += buf.len();
+        self.rpos += read_len;
         Ok(read_len)
     }
 }

@@ -181,6 +181,18 @@ fn test_read_larger_buffer() {
 }
 
 #[test]
+fn test_read_larger_buffer_twice() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 2];
+    buffer.read(&mut res).unwrap();
+    // Check for overflow on second read
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+    assert_eq!(res[1], 0);
+}
+
+#[test]
 fn test_write() {
     let mut buffer = ByteBuffer::new();
     buffer.write(&[0x1, 0xFF, 0x45]).unwrap();
