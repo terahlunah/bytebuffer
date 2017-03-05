@@ -1,6 +1,6 @@
 [package]
 name = "bytebuffer"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Terah <terah.dev@gmail.com>", "Shiroy <awacheux.utc@gmail.com>"]
 description = "A byte buffer for networking and binary protocols"
 homepage = "https://github.com/Terah-/rust-bytebuffer"
