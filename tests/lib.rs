@@ -1,6 +1,7 @@
 extern crate bytebuffer;
 
 use bytebuffer::*;
+use std::io::{Read, Write};
 
 #[test]
 fn test_empty() {
@@ -109,7 +110,6 @@ fn test_read_bit() {
     assert_eq!(bit1, true);
     let bit2 = buffer.read_bit();
     assert_eq!(bit2, false);
-
 }
 
 #[test]
@@ -151,4 +151,80 @@ fn test_flush_bit() {
 
     assert_eq!(bit1, true);
     assert_eq!(number1, 1);
+}
+
+#[test]
+fn test_read_empty_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [];
+    buffer.read(&mut res).unwrap();
+}
+
+#[test]
+fn test_read_exact_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 1];
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+}
+
+#[test]
+fn test_read_larger_buffer() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 2];
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+    assert_eq!(res[1], 0);
+}
+
+#[test]
+fn test_read_larger_buffer_twice() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFF);
+    let mut res = [0; 2];
+    buffer.read(&mut res).unwrap();
+    // Check for overflow on second read
+    buffer.read(&mut res).unwrap();
+    assert_eq!(res[0], 0xFF);
+    assert_eq!(res[1], 0);
+}
+
+#[test]
+fn test_write() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write(&[0x1, 0xFF, 0x45]).unwrap();
+    assert_eq!(buffer.read_bytes(3), &[0x1, 0xFF, 0x45]);
+}
+
+#[test]
+fn test_flush() {
+    let mut buffer = ByteBuffer::new();
+    buffer.flush().unwrap();
+}
+
+#[test]
+fn test_debug() {
+    let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
+    buffer.read_u8();
+    let debug_string = format!("{:?}", buffer);
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+}
+
+#[test]
+fn test_debug_with_bit_reads() {
+    let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
+    let first_four_bits = buffer.read_bits(4);
+    let debug_string = format!("{:?}", buffer);
+    assert_eq!(buffer.get_rpos(), 0);
+    let next_four_bits = buffer.read_bits(4);
+    assert_eq!(buffer.get_rpos(), 1);
+    let remaining = buffer.read_bits(16);
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+    assert_eq!(first_four_bits, 0);
+    assert_eq!(next_four_bits, 1);
+    assert_eq!(remaining, 65349);
+    assert_eq!(buffer.get_rpos(), 3);
 }
