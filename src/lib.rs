@@ -1,7 +1,14 @@
 extern crate byteorder;
 
-use byteorder::{ByteOrder, BigEndian};
+use byteorder::{ByteOrder, BigEndian, LittleEndian};
 use std::io::{Read, Write, Result};
+
+/// An enum to represent the byte order of the ByteBuffer object
+#[derive(Debug, Clone, Copy)]
+pub enum Endian{
+    BigEndian,
+    LittleEndian,
+}
 
 /// A byte buffer object specifically turned to easily read and write binary values
 pub struct ByteBuffer {
@@ -10,6 +17,7 @@ pub struct ByteBuffer {
     rpos: usize,
     rbit: usize,
     wbit: usize,
+    endian: Endian,
 }
 
 impl ByteBuffer {
@@ -21,6 +29,7 @@ impl ByteBuffer {
             rpos: 0,
             rbit: 0,
             wbit: 0,
+            endian: Endian::BigEndian,       
         }
     }
 
@@ -51,6 +60,18 @@ impl ByteBuffer {
         if diff > 0 {
             self.data.extend(std::iter::repeat(0).take(diff))
         }
+    }
+
+    /// Set the byte order of the buffer
+    ///
+    /// _Note_: By default the buffer uses big endian order
+    pub fn set_endian(&mut self, endian: Endian) {
+        self.endian = endian;
+    }
+
+    /// Returns the current byte order of the buffer
+    pub fn endian(&self) -> Endian {
+        self.endian
     }
 
     // Write operations
@@ -108,7 +129,12 @@ impl ByteBuffer {
     /// ```
     pub fn write_u16(&mut self, val: u16) {
         let mut buf = [0; 2];
-        BigEndian::write_u16(&mut buf, val);
+        
+        match self.endian{
+            Endian::BigEndian => BigEndian::write_u16(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_u16(&mut buf, val),
+        };
+
         self.write_bytes(&buf);
     }
 
@@ -128,7 +154,12 @@ impl ByteBuffer {
     /// ```
     pub fn write_u32(&mut self, val: u32) {
         let mut buf = [0; 4];
-        BigEndian::write_u32(&mut buf, val);
+        
+        match self.endian{
+            Endian::BigEndian => BigEndian::write_u32(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_u32(&mut buf, val),
+        };
+
         self.write_bytes(&buf);
     }
 
@@ -148,7 +179,11 @@ impl ByteBuffer {
     /// ```
     pub fn write_u64(&mut self, val: u64) {
         let mut buf = [0; 8];
-        BigEndian::write_u64(&mut buf, val);
+        match self.endian{
+            Endian::BigEndian => BigEndian::write_u64(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_u64(&mut buf, val),
+        };
+
         self.write_bytes(&buf);
     }
 
@@ -168,7 +203,12 @@ impl ByteBuffer {
     /// ```
     pub fn write_f32(&mut self, val: f32) {
         let mut buf = [0; 4];
-        BigEndian::write_f32(&mut buf, val);
+        
+        match self.endian{
+            Endian::BigEndian => BigEndian::write_f32(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_f32(&mut buf, val),
+        };
+
         self.write_bytes(&buf);
     }
 
@@ -183,7 +223,11 @@ impl ByteBuffer {
     /// ```
     pub fn write_f64(&mut self, val: f64) {
         let mut buf = [0; 8];
-        BigEndian::write_f64(&mut buf, val);
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::write_f64(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_f64(&mut buf, val),
+        };
         self.write_bytes(&buf);
     }
 
@@ -252,7 +296,11 @@ impl ByteBuffer {
         assert!(self.rpos + 2 <= self.data.len());
         let range = self.rpos..self.rpos + 2;
         self.rpos += 2;
-        BigEndian::read_u16(&self.data[range])
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::read_u16(&self.data[range]),
+            Endian::LittleEndian => LittleEndian::read_u16(&self.data[range]),
+        }
     }
 
     /// Same as `read_u16()` but for signed values
@@ -274,7 +322,11 @@ impl ByteBuffer {
         assert!(self.rpos + 4 <= self.data.len());
         let range = self.rpos..self.rpos + 4;
         self.rpos += 4;
-        BigEndian::read_u32(&self.data[range])
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::read_u32(&self.data[range]),
+            Endian::LittleEndian => LittleEndian::read_u32(&self.data[range]),
+        }
     }
 
     /// Same as `read_u32()` but for signed values
@@ -296,7 +348,12 @@ impl ByteBuffer {
         assert!(self.rpos + 8 <= self.data.len());
         let range = self.rpos..self.rpos + 8;
         self.rpos += 8;
-        BigEndian::read_u64(&self.data[range])
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::read_u64(&self.data[range]),
+            Endian::LittleEndian => LittleEndian::read_u64(&self.data[range]),
+        }
+
     }
 
     /// Same as `read_u64()` but for signed values
@@ -310,7 +367,11 @@ impl ByteBuffer {
         assert!(self.rpos + 4 <= self.data.len());
         let range = self.rpos..self.rpos + 4;
         self.rpos += 4;
-        BigEndian::read_f32(&self.data[range])
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::read_f32(&self.data[range]),
+            Endian::LittleEndian => LittleEndian::read_f32(&self.data[range]),
+        }
     }
 
     /// Read a 64 bits floating point value. The program crash if not enough bytes are available
@@ -319,7 +380,11 @@ impl ByteBuffer {
         assert!(self.rpos + 8 <= self.data.len());
         let range = self.rpos..self.rpos + 8;
         self.rpos += 8;
-        BigEndian::read_f64(&self.data[range])
+
+        match self.endian{
+            Endian::BigEndian => BigEndian::read_f64(&self.data[range]),
+            Endian::LittleEndian => LittleEndian::read_f64(&self.data[range]),
+        }
     }
 
     /// Read a string.
@@ -524,7 +589,7 @@ impl std::fmt::Debug for ByteBuffer {
             remaining_data[i] = *val;
         }
 
-        write!(f, "ByteBuffer {{ remaining_data: {:?}, total_data: {:?} }}",
-               remaining_data, self.data)
+        write!(f, "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
+               remaining_data, self.data, self.endian)
     }
 }
