@@ -25,8 +25,24 @@ fn test_u16() {
 }
 
 #[test]
+fn test_u16_little_endian(){
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_u16(0xF0E1);
+    assert_eq!(buffer.read_u16(), 0xF0E1);
+}
+
+#[test]
 fn test_u32() {
     let mut buffer = ByteBuffer::new();
+    buffer.write_u32(0xF0E1D2C3);
+    assert_eq!(buffer.read_u32(), 0xF0E1D2C3);
+}
+
+#[test]
+fn test_u32_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
     buffer.write_u32(0xF0E1D2C3);
     assert_eq!(buffer.read_u32(), 0xF0E1D2C3);
 }
@@ -39,8 +55,24 @@ fn test_u64() {
 }
 
 #[test]
+fn test_u64_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_u64(0xF0E1D2C3B4A59687);
+    assert_eq!(buffer.read_u64(), 0xF0E1D2C3B4A59687);
+}
+
+#[test]
 fn test_signed() {
     let mut buffer = ByteBuffer::new();
+    buffer.write_i8(-1);
+    assert_eq!(buffer.read_u8(), 0xFF);
+}
+
+#[test]
+fn test_signed_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
     buffer.write_i8(-1);
     assert_eq!(buffer.read_u8(), 0xFF);
 }
@@ -210,7 +242,7 @@ fn test_debug() {
     let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
     buffer.read_u8();
     let debug_string = format!("{:?}", buffer);
-    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
 }
 
 #[test]
@@ -222,7 +254,7 @@ fn test_debug_with_bit_reads() {
     let next_four_bits = buffer.read_bits(4);
     assert_eq!(buffer.get_rpos(), 1);
     let remaining = buffer.read_bits(16);
-    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69] }");
+    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
     assert_eq!(first_four_bits, 0);
     assert_eq!(next_four_bits, 1);
     assert_eq!(remaining, 65349);
