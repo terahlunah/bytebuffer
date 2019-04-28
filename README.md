@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/terahxluna/rust-bytebuffer.svg)](https://travis-ci.org/terahxluna/rust-bytebuffer)
+[![Build Status](https://travis-ci.org/terahlunah/rust-bytebuffer.svg?branch=master)](https://travis-ci.org/terahlunah/rust-bytebuffer)
 [![Crates.io](https://img.shields.io/crates/v/bytebuffer.svg)](https://crates.io/crates/bytebuffer)
 [![Documentation](https://docs.rs/bytebuffer/badge.svg)](https://docs.rs/bytebuffer)
 
