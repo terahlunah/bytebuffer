@@ -228,7 +228,7 @@ fn test_read_larger_buffer_twice() {
 fn test_write() {
     let mut buffer = ByteBuffer::new();
     buffer.write(&[0x1, 0xFF, 0x45]).unwrap();
-    assert_eq!(buffer.read_bytes(3), &[0x1, 0xFF, 0x45]);
+    assert_eq!(buffer.read_bytes(3).unwrap(), &[0x1, 0xFF, 0x45]);
 }
 
 #[test]
@@ -259,4 +259,11 @@ fn test_debug_with_bit_reads() {
     assert_eq!(next_four_bits, 1);
     assert_eq!(remaining, 65349);
     assert_eq!(buffer.get_rpos(), 3);
+}
+
+#[test]
+fn test_error_on_overread() {
+    let mut buffer = ByteBuffer::new();
+    let result = buffer.read_bytes(1);
+    assert!(result.is_err())
 }

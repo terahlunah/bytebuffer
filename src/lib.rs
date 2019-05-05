@@ -1,7 +1,7 @@
 extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use std::io::{Read, Write, Result};
+use std::io::{Read, Write, Result, Error};
 
 /// An enum to represent the byte order of the ByteBuffer object
 #[derive(Debug, Clone, Copy)]
@@ -250,14 +250,14 @@ impl ByteBuffer {
     // Read operations
 
     /// Read a defined amount of raw bytes. The program crash if not enough bytes are available
-    pub fn read_bytes(&mut self, size: usize) -> Vec<u8> {
+    pub fn read_bytes(&mut self, size: usize) -> std::result::Result<Vec<u8>, Error> {
         self.flush_bit();
         assert!(self.rpos + size <= self.data.len());
         let range = self.rpos..self.rpos + size;
         let mut res = Vec::<u8>::new();
         res.write(&self.data[range]).unwrap();
         self.rpos += size;
-        res
+        Ok(res)
     }
 
     /// Read one byte. The program crash if not enough bytes are available
@@ -392,7 +392,7 @@ impl ByteBuffer {
     /// *Note* : First it reads a 32 bits value representing the size, the read 'size' raw bytes.
     pub fn read_string(&mut self) -> String {
         let size = self.read_u32();
-        String::from_utf8(self.read_bytes(size as usize)).unwrap()
+        String::from_utf8(self.read_bytes(size as usize).unwrap()).unwrap()
     }
 
     // Other
