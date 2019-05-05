@@ -81,7 +81,7 @@ fn test_signed_little_endian() {
 fn test_string() {
     let mut buffer = ByteBuffer::new();
     buffer.write_string("hello");
-    assert_eq!(buffer.read_string(), "hello");
+    assert_eq!(buffer.read_string().unwrap(), "hello");
 }
 
 
@@ -92,8 +92,19 @@ fn test_mixed() {
     buffer.write_string("hello");
     buffer.write_u64(0xF0E1D2C3B4A59687);
     assert_eq!(buffer.read_i16(), -1);
-    assert_eq!(buffer.read_string(), "hello");
+    assert_eq!(buffer.read_string().unwrap(), "hello");
     assert_eq!(buffer.read_u64(), 0xF0E1D2C3B4A59687);
+}
+
+#[test]
+fn test_string_overread_protection() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u32(2);
+    buffer.write_bytes(&[0x65]);
+    let result = buffer.read_string();
+    assert!(result.is_err());
+    let error = result.err().unwrap();
+    assert_eq!(error.kind(), ErrorKind::UnexpectedEof);
 }
 
 #[test]

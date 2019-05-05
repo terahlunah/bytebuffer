@@ -391,10 +391,10 @@ impl ByteBuffer {
 
     /// Read a string.
     ///
-    /// *Note* : First it reads a 32 bits value representing the size, the read 'size' raw bytes.
-    pub fn read_string(&mut self) -> String {
+    /// *Note* : First it reads a 32 bits value representing the size, then 'size' raw bytes.
+    pub fn read_string(&mut self) -> std::result::Result<String, Error> {
         let size = self.read_u32();
-        String::from_utf8(self.read_bytes(size as usize).unwrap()).unwrap()
+        Ok(String::from_utf8(self.read_bytes(size as usize).unwrap()).unwrap())
     }
 
     // Other
