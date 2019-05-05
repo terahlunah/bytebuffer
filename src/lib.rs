@@ -1,7 +1,7 @@
 extern crate byteorder;
 
 use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use std::io::{Read, Write, Result, Error};
+use std::io::{Read, Write, Result, Error, ErrorKind};
 
 /// An enum to represent the byte order of the ByteBuffer object
 #[derive(Debug, Clone, Copy)]
@@ -249,10 +249,12 @@ impl ByteBuffer {
 
     // Read operations
 
-    /// Read a defined amount of raw bytes. The program crash if not enough bytes are available
+    /// Read a defined amount of raw bytes and return an IO error if not enough bytes are available
     pub fn read_bytes(&mut self, size: usize) -> std::result::Result<Vec<u8>, Error> {
         self.flush_bit();
-        assert!(self.rpos + size <= self.data.len());
+        if self.rpos + size > self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bytes from buffer"))
+        }
         let range = self.rpos..self.rpos + size;
         let mut res = Vec::<u8>::new();
         res.write(&self.data[range]).unwrap();

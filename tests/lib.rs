@@ -1,7 +1,7 @@
 extern crate bytebuffer;
 
 use bytebuffer::*;
-use std::io::{Read, Write};
+use std::io::{Read, Write, ErrorKind};
 
 #[test]
 fn test_empty() {
@@ -265,5 +265,7 @@ fn test_debug_with_bit_reads() {
 fn test_error_on_overread() {
     let mut buffer = ByteBuffer::new();
     let result = buffer.read_bytes(1);
-    assert!(result.is_err())
+    assert!(result.is_err());
+    let error = result.err().unwrap();
+    assert_eq!(error.kind(), ErrorKind::UnexpectedEof);
 }
