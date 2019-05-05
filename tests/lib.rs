@@ -14,7 +14,7 @@ fn test_empty() {
 fn test_u8() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xF0);
-    assert_eq!(buffer.read_u8(), 0xF0);
+    assert_eq!(buffer.read_u8().unwrap(), 0xF0);
 }
 
 #[test]
@@ -66,7 +66,7 @@ fn test_u64_little_endian() {
 fn test_signed() {
     let mut buffer = ByteBuffer::new();
     buffer.write_i8(-1);
-    assert_eq!(buffer.read_u8(), 0xFF);
+    assert_eq!(buffer.read_u8().unwrap(), 0xFF);
 }
 
 #[test]
@@ -74,7 +74,7 @@ fn test_signed_little_endian() {
     let mut buffer = ByteBuffer::new();
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_i8(-1);
-    assert_eq!(buffer.read_u8(), 0xFF);
+    assert_eq!(buffer.read_u8().unwrap(), 0xFF);
 }
 
 #[test]
@@ -130,7 +130,7 @@ fn test_rpos() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u32(0x0000FF00);
     buffer.set_rpos(2);
-    assert_eq!(buffer.read_u8(), 0xFF);
+    assert_eq!(buffer.read_u8().unwrap(), 0xFF);
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn test_to_bytes() {
 #[test]
 fn test_from_bytes() {
     let mut buffer = ByteBuffer::from_bytes(&vec![1, 2]);
-    assert_eq!(buffer.read_u8() + buffer.read_u8(), 3);
+    assert_eq!(buffer.read_u8().unwrap() + buffer.read_u8().unwrap(), 3);
 }
 
 #[test]
@@ -190,7 +190,7 @@ fn test_flush_bit() {
 
     let mut buffer2 = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
     let bit1 = buffer2.read_bit();
-    let number1 = buffer2.read_i8();
+    let number1 = buffer2.read_i8().unwrap();
 
     assert_eq!(bit1, true);
     assert_eq!(number1, 1);
@@ -251,7 +251,7 @@ fn test_flush() {
 #[test]
 fn test_debug() {
     let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
-    buffer.read_u8();
+    buffer.read_u8().unwrap();
     let debug_string = format!("{:?}", buffer);
     assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
 }
@@ -272,11 +272,22 @@ fn test_debug_with_bit_reads() {
     assert_eq!(buffer.get_rpos(), 3);
 }
 
-#[test]
-fn test_error_on_overread() {
-    let mut buffer = ByteBuffer::new();
-    let result = buffer.read_bytes(1);
-    assert!(result.is_err());
-    let error = result.err().unwrap();
-    assert_eq!(error.kind(), ErrorKind::UnexpectedEof);
+macro_rules! overread_tests {
+    ($($name:ident: $value:expr,)*) => {
+        $(
+            #[test]
+            fn $name() {
+                let result = $value;
+                assert!(result.is_err());
+                let error = result.err().unwrap();
+                assert_eq!(error.kind(), ErrorKind::UnexpectedEof);
+            }
+         )*
+    }
+}
+
+overread_tests! {
+    overread_bytes: ByteBuffer::new().read_bytes(1),
+    overread_u8: ByteBuffer::new().read_u8(),
+    overread_i8: ByteBuffer::new().read_i8(),
 }

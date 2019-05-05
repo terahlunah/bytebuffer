@@ -249,7 +249,7 @@ impl ByteBuffer {
 
     // Read operations
 
-    /// Read a defined amount of raw bytes and return an IO error if not enough bytes are available
+    /// Read a defined amount of raw bytes, or return an IO error if not enough bytes are available
     pub fn read_bytes(&mut self, size: usize) -> std::result::Result<Vec<u8>, Error> {
         self.flush_bit();
         if self.rpos + size > self.data.len() {
@@ -262,26 +262,31 @@ impl ByteBuffer {
         Ok(res)
     }
 
-    /// Read one byte. The program crash if not enough bytes are available
+    /// Read one byte, or return an IO error if not enough bytes are available
     ///
     /// #Example
     ///
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x1]);
-    /// let value = buffer.read_u8(); //Value contains 1
+    /// let value = buffer.read_u8().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u8(&mut self) -> u8 {
+    pub fn read_u8(&mut self) -> std::result::Result<u8, Error> {
         self.flush_bit();
-        assert!(self.rpos < self.data.len());
+        if self.rpos >= self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+        }
         let pos = self.rpos;
         self.rpos += 1;
-        self.data[pos]
+        Ok(self.data[pos])
     }
 
     /// Same as `read_u8()` but for signed values
-    pub fn read_i8(&mut self) -> i8 {
-        self.read_u8() as i8
+    pub fn read_i8(&mut self) -> std::result::Result<i8, Error> {
+        match self.read_u8() {
+            Ok(u8_value) => Ok(u8_value as i8),
+            Err(error) => Err(error),
+        }
     }
 
     /// Read a 2-bytes long value. The program crash if not enough bytes are available
@@ -397,7 +402,7 @@ impl ByteBuffer {
         let bytes = self.read_bytes(size as usize);
         match bytes {
             Ok(string_content) => Ok(String::from_utf8(string_content).unwrap()),
-			Err(error) => Err(error)
+            Err(error) => Err(error)
         }
     }
 
