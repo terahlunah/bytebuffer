@@ -235,7 +235,7 @@ impl ByteBuffer {
     ///
     /// *Format* The format is `(u32)size + size * (u8)characters`
     ///
-    /// #Exapmle
+    /// #Example
     ///
     /// ```
     /// #  use bytebuffer::*;
@@ -293,23 +293,25 @@ impl ByteBuffer {
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x1]);
-    /// let value = buffer.read_u16(); //Value contains 1
+    /// let value = buffer.read_u16().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u16(&mut self) -> u16 {
+    pub fn read_u16(&mut self) -> std::result::Result<u16, Error> {
         self.flush_bit();
-        assert!(self.rpos + 2 <= self.data.len());
+        if self.rpos + 2 > self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+        }
         let range = self.rpos..self.rpos + 2;
         self.rpos += 2;
 
-        match self.endian{
+        Ok(match self.endian{
             Endian::BigEndian => BigEndian::read_u16(&self.data[range]),
             Endian::LittleEndian => LittleEndian::read_u16(&self.data[range]),
-        }
+        })
     }
 
     /// Same as `read_u16()` but for signed values
-    pub fn read_i16(&mut self) -> i16 {
-        self.read_u16() as i16
+    pub fn read_i16(&mut self) -> std::result::Result<i16, Error> {
+        Ok(self.read_u16()? as i16)
     }
 
     /// Read a four-bytes long value. The program crash if not enough bytes are available
@@ -319,23 +321,25 @@ impl ByteBuffer {
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x1]);
-    /// let value = buffer.read_u32(); // Value contains 1
+    /// let value = buffer.read_u32().unwrap(); // Value contains 1
     /// ```
-    pub fn read_u32(&mut self) -> u32 {
+    pub fn read_u32(&mut self) -> std::result::Result<u32, Error> {
         self.flush_bit();
-        assert!(self.rpos + 4 <= self.data.len());
+        if self.rpos + 4 > self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+        }
         let range = self.rpos..self.rpos + 4;
         self.rpos += 4;
 
-        match self.endian{
+        Ok(match self.endian{
             Endian::BigEndian => BigEndian::read_u32(&self.data[range]),
             Endian::LittleEndian => LittleEndian::read_u32(&self.data[range]),
-        }
+        })
     }
 
     /// Same as `read_u32()` but for signed values
-    pub fn read_i32(&mut self) -> i32 {
-        self.read_u32() as i32
+    pub fn read_i32(&mut self) -> std::result::Result<i32, Error> {
+        Ok(self.read_u32()? as i32)
     }
 
     /// Read an eight bytes long value. The program crash if not enough bytes are available
@@ -345,24 +349,25 @@ impl ByteBuffer {
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1]);
-    /// let value = buffer.read_u64(); //Value contains 1
+    /// let value = buffer.read_u64().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u64(&mut self) -> u64 {
+    pub fn read_u64(&mut self) -> std::result::Result<u64, Error> {
         self.flush_bit();
-        assert!(self.rpos + 8 <= self.data.len());
+        if self.rpos + 8 > self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+        }
         let range = self.rpos..self.rpos + 8;
         self.rpos += 8;
 
-        match self.endian{
+        Ok(match self.endian{
             Endian::BigEndian => BigEndian::read_u64(&self.data[range]),
             Endian::LittleEndian => LittleEndian::read_u64(&self.data[range]),
-        }
-
+        })
     }
 
     /// Same as `read_u64()` but for signed values
-    pub fn read_i64(&mut self) -> i64 {
-        self.read_u64() as i64
+    pub fn read_i64(&mut self) -> std::result::Result<i64, Error> {
+        Ok(self.read_u64()? as i64)
     }
 
     /// Read a 32 bits floating point value. The program crash if not enough bytes are available
@@ -395,7 +400,7 @@ impl ByteBuffer {
     ///
     /// *Note* : First it reads a 32 bits value representing the size, then 'size' raw bytes.
     pub fn read_string(&mut self) -> std::result::Result<String, Error> {
-        let size = self.read_u32();
+        let size = self.read_u32()?;
         Ok(String::from_utf8(self.read_bytes(size as usize)?).unwrap())
     }
 

@@ -21,7 +21,7 @@ fn test_u8() {
 fn test_u16() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u16(0xF0E1);
-    assert_eq!(buffer.read_u16(), 0xF0E1);
+    assert_eq!(buffer.read_u16().unwrap(), 0xF0E1);
 }
 
 #[test]
@@ -29,14 +29,14 @@ fn test_u16_little_endian(){
     let mut buffer = ByteBuffer::new();
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_u16(0xF0E1);
-    assert_eq!(buffer.read_u16(), 0xF0E1);
+    assert_eq!(buffer.read_u16().unwrap(), 0xF0E1);
 }
 
 #[test]
 fn test_u32() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u32(0xF0E1D2C3);
-    assert_eq!(buffer.read_u32(), 0xF0E1D2C3);
+    assert_eq!(buffer.read_u32().unwrap(), 0xF0E1D2C3);
 }
 
 #[test]
@@ -44,14 +44,14 @@ fn test_u32_little_endian() {
     let mut buffer = ByteBuffer::new();
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_u32(0xF0E1D2C3);
-    assert_eq!(buffer.read_u32(), 0xF0E1D2C3);
+    assert_eq!(buffer.read_u32().unwrap(), 0xF0E1D2C3);
 }
 
 #[test]
 fn test_u64() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u64(0xF0E1D2C3B4A59687);
-    assert_eq!(buffer.read_u64(), 0xF0E1D2C3B4A59687);
+    assert_eq!(buffer.read_u64().unwrap(), 0xF0E1D2C3B4A59687);
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn test_u64_little_endian() {
     let mut buffer = ByteBuffer::new();
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_u64(0xF0E1D2C3B4A59687);
-    assert_eq!(buffer.read_u64(), 0xF0E1D2C3B4A59687);
+    assert_eq!(buffer.read_u64().unwrap(), 0xF0E1D2C3B4A59687);
 }
 
 #[test]
@@ -91,9 +91,9 @@ fn test_mixed() {
     buffer.write_i16(-1);
     buffer.write_string("hello");
     buffer.write_u64(0xF0E1D2C3B4A59687);
-    assert_eq!(buffer.read_i16(), -1);
+    assert_eq!(buffer.read_i16().unwrap(), -1);
     assert_eq!(buffer.read_string().unwrap(), "hello");
-    assert_eq!(buffer.read_u64(), 0xF0E1D2C3B4A59687);
+    assert_eq!(buffer.read_u64().unwrap(), 0xF0E1D2C3B4A59687);
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_wpos() {
     buffer.set_wpos(1);
     buffer.write_u8(0xFF);
     buffer.write_u8(0x11);
-    assert_eq!(buffer.read_u32(), 0x00FF1100);
+    assert_eq!(buffer.read_u32().unwrap(), 0x00FF1100);
 }
 
 #[test]
@@ -290,4 +290,10 @@ overread_tests! {
     overread_bytes: ByteBuffer::new().read_bytes(1),
     overread_u8: ByteBuffer::new().read_u8(),
     overread_i8: ByteBuffer::new().read_i8(),
+    overread_u16: ByteBuffer::new().read_u16(),
+    overread_i16: ByteBuffer::new().read_i16(),
+    overread_u32: ByteBuffer::new().read_u32(),
+    overread_i32: ByteBuffer::new().read_i32(),
+    overread_u64: ByteBuffer::new().read_u64(),
+    overread_i64: ByteBuffer::new().read_i64(),
 }
