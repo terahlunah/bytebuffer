@@ -283,10 +283,7 @@ impl ByteBuffer {
 
     /// Same as `read_u8()` but for signed values
     pub fn read_i8(&mut self) -> std::result::Result<i8, Error> {
-        match self.read_u8() {
-            Ok(u8_value) => Ok(u8_value as i8),
-            Err(error) => Err(error),
-        }
+        Ok(self.read_u8()? as i8)
     }
 
     /// Read a 2-bytes long value. The program crash if not enough bytes are available
@@ -399,11 +396,7 @@ impl ByteBuffer {
     /// *Note* : First it reads a 32 bits value representing the size, then 'size' raw bytes.
     pub fn read_string(&mut self) -> std::result::Result<String, Error> {
         let size = self.read_u32();
-        let bytes = self.read_bytes(size as usize);
-        match bytes {
-            Ok(string_content) => Ok(String::from_utf8(string_content).unwrap()),
-            Err(error) => Err(error)
-        }
+        Ok(String::from_utf8(self.read_bytes(size as usize)?).unwrap())
     }
 
     // Other
