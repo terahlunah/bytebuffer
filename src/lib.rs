@@ -249,7 +249,8 @@ impl ByteBuffer {
 
     // Read operations
 
-    /// Read a defined amount of raw bytes, or return an IO error if not enough bytes are available
+    /// Read a defined amount of raw bytes, or return an IO error if not enough bytes are
+    /// available.
     pub fn read_bytes(&mut self, size: usize) -> std::result::Result<Vec<u8>, Error> {
         self.flush_bit();
         if self.rpos + size > self.data.len() {
@@ -262,7 +263,7 @@ impl ByteBuffer {
         Ok(res)
     }
 
-    /// Read one byte, or return an IO error if not enough bytes are available
+    /// Read one byte, or return an IO error if not enough bytes are available.
     ///
     /// #Example
     ///
@@ -286,7 +287,7 @@ impl ByteBuffer {
         Ok(self.read_u8()? as i8)
     }
 
-    /// Read a 2-bytes long value. The program crash if not enough bytes are available
+    /// Read a 2-bytes long value, or return an IO error if not enough bytes are available.
     ///
     /// #Example
     ///
@@ -314,7 +315,7 @@ impl ByteBuffer {
         Ok(self.read_u16()? as i16)
     }
 
-    /// Read a four-bytes long value. The program crash if not enough bytes are available
+    /// Read a four-bytes long value, or return an IO error if not enough bytes are available.
     ///
     /// #Example
     ///
@@ -342,7 +343,7 @@ impl ByteBuffer {
         Ok(self.read_u32()? as i32)
     }
 
-    /// Read an eight bytes long value. The program crash if not enough bytes are available
+    /// Read an eight bytes long value, or return an IO error if not enough bytes are available.
     ///
     /// #Example
     ///
