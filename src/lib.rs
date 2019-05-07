@@ -251,7 +251,7 @@ impl ByteBuffer {
 
     /// Read a defined amount of raw bytes, or return an IO error if not enough bytes are
     /// available.
-    pub fn read_bytes(&mut self, size: usize) -> std::result::Result<Vec<u8>, Error> {
+    pub fn read_bytes(&mut self, size: usize) -> Result<Vec<u8>> {
         self.flush_bit();
         if self.rpos + size > self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bytes from buffer"))
@@ -272,7 +272,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x1]);
     /// let value = buffer.read_u8().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u8(&mut self) -> std::result::Result<u8, Error> {
+    pub fn read_u8(&mut self) -> Result<u8> {
         self.flush_bit();
         if self.rpos >= self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
@@ -283,7 +283,7 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u8()` but for signed values
-    pub fn read_i8(&mut self) -> std::result::Result<i8, Error> {
+    pub fn read_i8(&mut self) -> Result<i8> {
         Ok(self.read_u8()? as i8)
     }
 
@@ -296,7 +296,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x1]);
     /// let value = buffer.read_u16().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u16(&mut self) -> std::result::Result<u16, Error> {
+    pub fn read_u16(&mut self) -> Result<u16> {
         self.flush_bit();
         if self.rpos + 2 > self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
@@ -311,7 +311,7 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u16()` but for signed values
-    pub fn read_i16(&mut self) -> std::result::Result<i16, Error> {
+    pub fn read_i16(&mut self) -> Result<i16> {
         Ok(self.read_u16()? as i16)
     }
 
@@ -324,7 +324,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x1]);
     /// let value = buffer.read_u32().unwrap(); // Value contains 1
     /// ```
-    pub fn read_u32(&mut self) -> std::result::Result<u32, Error> {
+    pub fn read_u32(&mut self) -> Result<u32> {
         self.flush_bit();
         if self.rpos + 4 > self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
@@ -339,7 +339,7 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u32()` but for signed values
-    pub fn read_i32(&mut self) -> std::result::Result<i32, Error> {
+    pub fn read_i32(&mut self) -> Result<i32> {
         Ok(self.read_u32()? as i32)
     }
 
@@ -352,7 +352,7 @@ impl ByteBuffer {
     /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1]);
     /// let value = buffer.read_u64().unwrap(); //Value contains 1
     /// ```
-    pub fn read_u64(&mut self) -> std::result::Result<u64, Error> {
+    pub fn read_u64(&mut self) -> Result<u64> {
         self.flush_bit();
         if self.rpos + 8 > self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
@@ -367,7 +367,7 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u64()` but for signed values
-    pub fn read_i64(&mut self) -> std::result::Result<i64, Error> {
+    pub fn read_i64(&mut self) -> Result<i64> {
         Ok(self.read_u64()? as i64)
     }
 
