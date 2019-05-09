@@ -20,6 +20,24 @@ pub struct ByteBuffer {
     endian: Endian,
 }
 
+macro_rules! read_var {
+    ($self:ident, $name:ident, $offset:expr) => {
+        {
+            $self.flush_bit();
+            if $self.rpos + $offset > $self.data.len() {
+                return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+            }
+            let range = $self.rpos..$self.rpos + $offset;
+            $self.rpos += $offset;
+
+            Ok(match $self.endian{
+                Endian::BigEndian => BigEndian::$name(&$self.data[range]),
+                Endian::LittleEndian => LittleEndian::$name(&$self.data[range]),
+            })
+        }
+    }
+}
+
 impl ByteBuffer {
     /// Construct a new, empty, ByteBuffer
     pub fn new() -> ByteBuffer {
@@ -297,17 +315,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u16().unwrap(); //Value contains 1
     /// ```
     pub fn read_u16(&mut self) -> Result<u16> {
-        self.flush_bit();
-        if self.rpos + 2 > self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
-        }
-        let range = self.rpos..self.rpos + 2;
-        self.rpos += 2;
-
-        Ok(match self.endian{
-            Endian::BigEndian => BigEndian::read_u16(&self.data[range]),
-            Endian::LittleEndian => LittleEndian::read_u16(&self.data[range]),
-        })
+        read_var!(self, read_u16, 2)
     }
 
     /// Same as `read_u16()` but for signed values
@@ -325,17 +333,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u32().unwrap(); // Value contains 1
     /// ```
     pub fn read_u32(&mut self) -> Result<u32> {
-        self.flush_bit();
-        if self.rpos + 4 > self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
-        }
-        let range = self.rpos..self.rpos + 4;
-        self.rpos += 4;
-
-        Ok(match self.endian{
-            Endian::BigEndian => BigEndian::read_u32(&self.data[range]),
-            Endian::LittleEndian => LittleEndian::read_u32(&self.data[range]),
-        })
+        read_var!(self, read_u32, 4)
     }
 
     /// Same as `read_u32()` but for signed values
@@ -353,17 +351,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u64().unwrap(); //Value contains 1
     /// ```
     pub fn read_u64(&mut self) -> Result<u64> {
-        self.flush_bit();
-        if self.rpos + 8 > self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
-        }
-        let range = self.rpos..self.rpos + 8;
-        self.rpos += 8;
-
-        Ok(match self.endian{
-            Endian::BigEndian => BigEndian::read_u64(&self.data[range]),
-            Endian::LittleEndian => LittleEndian::read_u64(&self.data[range]),
-        })
+        read_var!(self, read_u64, 8)
     }
 
     /// Same as `read_u64()` but for signed values
@@ -372,35 +360,19 @@ impl ByteBuffer {
     }
 
     /// Read a 32 bits floating point value. The program crash if not enough bytes are available
-    pub fn read_f32(&mut self) -> f32 {
-        self.flush_bit();
-        assert!(self.rpos + 4 <= self.data.len());
-        let range = self.rpos..self.rpos + 4;
-        self.rpos += 4;
-
-        match self.endian{
-            Endian::BigEndian => BigEndian::read_f32(&self.data[range]),
-            Endian::LittleEndian => LittleEndian::read_f32(&self.data[range]),
-        }
+    pub fn read_f32(&mut self) -> Result<f32> {
+        read_var!(self, read_f32, 4)
     }
 
     /// Read a 64 bits floating point value. The program crash if not enough bytes are available
-    pub fn read_f64(&mut self) -> f64 {
-        self.flush_bit();
-        assert!(self.rpos + 8 <= self.data.len());
-        let range = self.rpos..self.rpos + 8;
-        self.rpos += 8;
-
-        match self.endian{
-            Endian::BigEndian => BigEndian::read_f64(&self.data[range]),
-            Endian::LittleEndian => LittleEndian::read_f64(&self.data[range]),
-        }
+    pub fn read_f64(&mut self) -> Result<f64> {
+        read_var!(self, read_f64, 8)
     }
 
     /// Read a string.
     ///
     /// *Note* : First it reads a 32 bits value representing the size, then 'size' raw bytes.
-    pub fn read_string(&mut self) -> std::result::Result<String, Error> {
+    pub fn read_string(&mut self) -> Result<String> {
         let size = self.read_u32()?;
         Ok(String::from_utf8(self.read_bytes(size as usize)?).unwrap())
     }

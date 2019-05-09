@@ -296,4 +296,6 @@ overread_tests! {
     overread_i32: ByteBuffer::new().read_i32(),
     overread_u64: ByteBuffer::new().read_u64(),
     overread_i64: ByteBuffer::new().read_i64(),
+    overread_f32: ByteBuffer::new().read_f32(),
+    overread_f64: ByteBuffer::new().read_f64(),
 }
