@@ -20,7 +20,7 @@ pub struct ByteBuffer {
     endian: Endian,
 }
 
-macro_rules! read_var {
+macro_rules! read_number {
     ($self:ident, $name:ident, $offset:expr) => {
         {
             $self.flush_bit();
@@ -315,7 +315,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u16().unwrap(); //Value contains 1
     /// ```
     pub fn read_u16(&mut self) -> Result<u16> {
-        read_var!(self, read_u16, 2)
+        read_number!(self, read_u16, 2)
     }
 
     /// Same as `read_u16()` but for signed values
@@ -333,7 +333,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u32().unwrap(); // Value contains 1
     /// ```
     pub fn read_u32(&mut self) -> Result<u32> {
-        read_var!(self, read_u32, 4)
+        read_number!(self, read_u32, 4)
     }
 
     /// Same as `read_u32()` but for signed values
@@ -351,7 +351,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u64().unwrap(); //Value contains 1
     /// ```
     pub fn read_u64(&mut self) -> Result<u64> {
-        read_var!(self, read_u64, 8)
+        read_number!(self, read_u64, 8)
     }
 
     /// Same as `read_u64()` but for signed values
@@ -361,12 +361,12 @@ impl ByteBuffer {
 
     /// Read a 32 bits floating point value. The program crash if not enough bytes are available
     pub fn read_f32(&mut self) -> Result<f32> {
-        read_var!(self, read_f32, 4)
+        read_number!(self, read_f32, 4)
     }
 
     /// Read a 64 bits floating point value. The program crash if not enough bytes are available
     pub fn read_f64(&mut self) -> Result<f64> {
-        read_var!(self, read_f64, 8)
+        read_number!(self, read_f64, 8)
     }
 
     /// Read a string.
