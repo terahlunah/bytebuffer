@@ -95,6 +95,7 @@ impl ByteBuffer {
     // Write operations
 
     /// Append a byte array to the buffer. The buffer is automatically extended if needed
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -119,6 +120,7 @@ impl ByteBuffer {
     }
 
     /// Append a byte (8 bits value) to the buffer
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -132,11 +134,13 @@ impl ByteBuffer {
     }
 
     /// Same as `write_u8()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn write_i8(&mut self, val: i8) {
         self.write_u8(val as u8);
     }
 
     /// Append a word (16 bits value) to the buffer
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -157,11 +161,13 @@ impl ByteBuffer {
     }
 
     /// Same as `write_u16()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn write_i16(&mut self, val: i16) {
         self.write_u16(val as u16);
     }
 
     /// Append a double word (32 bits value) to the buffer
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -182,11 +188,13 @@ impl ByteBuffer {
     }
 
     /// Same as `write_u32()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn write_i32(&mut self, val: i32) {
         self.write_u32(val as u32);
     }
 
     /// Append a quaddruple word (64 bits value) to the buffer
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -206,11 +214,13 @@ impl ByteBuffer {
     }
 
     /// Same as `write_u64()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn write_i64(&mut self, val: i64) {
         self.write_u64(val as u64);
     }
 
     /// Append a 32 bits floating point number to the buffer.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -231,6 +241,7 @@ impl ByteBuffer {
     }
 
     /// Append a 64 bits floating point number to the buffer.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -250,6 +261,7 @@ impl ByteBuffer {
     }
 
     /// Append a string to the buffer.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// *Format* The format is `(u32)size + size * (u8)characters`
     ///
@@ -269,6 +281,7 @@ impl ByteBuffer {
 
     /// Read a defined amount of raw bytes, or return an IO error if not enough bytes are
     /// available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_bytes(&mut self, size: usize) -> Result<Vec<u8>> {
         self.flush_bit();
         if self.rpos + size > self.data.len() {
@@ -282,6 +295,7 @@ impl ByteBuffer {
     }
 
     /// Read one byte, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -306,6 +320,7 @@ impl ByteBuffer {
     }
 
     /// Read a 2-bytes long value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -319,11 +334,13 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u16()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_i16(&mut self) -> Result<i16> {
         Ok(self.read_u16()? as i16)
     }
 
     /// Read a four-bytes long value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -337,11 +354,13 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u32()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_i32(&mut self) -> Result<i32> {
         Ok(self.read_u32()? as i32)
     }
 
     /// Read an eight bytes long value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
     ///
@@ -355,23 +374,28 @@ impl ByteBuffer {
     }
 
     /// Same as `read_u64()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_i64(&mut self) -> Result<i64> {
         Ok(self.read_u64()? as i64)
     }
 
-    /// Read a 32 bits floating point value. The program crash if not enough bytes are available
+    /// Read a 32 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_f32(&mut self) -> Result<f32> {
         read_number!(self, read_f32, 4)
     }
 
-    /// Read a 64 bits floating point value. The program crash if not enough bytes are available
+    /// Read a 64 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_f64(&mut self) -> Result<f64> {
         read_number!(self, read_f64, 8)
     }
 
     /// Read a string.
     ///
-    /// *Note* : First it reads a 32 bits value representing the size, then 'size' raw bytes.
+    /// _Note_: First it reads a 32 bits value representing the size, then 'size' raw bytes
+    ///         that  must be encoded as UTF8.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_string(&mut self) -> Result<String> {
         let size = self.read_u32()?;
         Ok(String::from_utf8(self.read_bytes(size as usize)?).unwrap())
