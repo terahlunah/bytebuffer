@@ -401,7 +401,7 @@ impl ByteBuffer {
         match String::from_utf8(self.read_bytes(size as usize)?)
         {
             Ok(string_result) => Ok(string_result),
-            Err(e) => Err(Error::new(ErrorKind::InvalidData, "could not parse string as UTF8"))
+            Err(e) => Err(Error::new(ErrorKind::InvalidData, e))
         }
     }
 
