@@ -398,7 +398,11 @@ impl ByteBuffer {
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_string(&mut self) -> Result<String> {
         let size = self.read_u32()?;
-        Ok(String::from_utf8(self.read_bytes(size as usize)?).unwrap())
+        match String::from_utf8(self.read_bytes(size as usize)?)
+        {
+            Ok(string_result) => Ok(string_result),
+            Err(e) => Err(Error::new(ErrorKind::InvalidData, "could not parse string as UTF8"))
+        }
     }
 
     // Other
