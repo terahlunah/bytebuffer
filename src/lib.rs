@@ -38,6 +38,12 @@ macro_rules! read_number {
     }
 }
 
+impl Default for ByteBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ByteBuffer {
     /// Construct a new, empty, ByteBuffer
     pub fn new() -> ByteBuffer {
@@ -61,6 +67,10 @@ impl ByteBuffer {
     /// Return the buffer size
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
     }
 
     /// Clear the buffer and reinitialize the reading and writing cursor
@@ -289,7 +299,7 @@ impl ByteBuffer {
         }
         let range = self.rpos..self.rpos + size;
         let mut res = Vec::<u8>::new();
-        res.write(&self.data[range]).unwrap();
+        res.write_all(&self.data[range])?;
         self.rpos += size;
         Ok(res)
     }
@@ -462,7 +472,7 @@ impl ByteBuffer {
         if self.rpos >= self.data.len() {
             return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
         }
-        let bit = self.data[self.rpos] & (1 << 7 - self.rbit) != 0;
+        let bit = self.data[self.rpos] & (1 << (7 - self.rbit)) != 0;
         self.rbit += 1;
         if self.rbit > 7 {
             self.flush_rbit();
@@ -491,7 +501,7 @@ impl ByteBuffer {
         if n == 0 {
             Ok(0)
         } else {
-            Ok(((if self.read_bit()? { 1 } else { 0 }) << n - 1) | self.read_bits(n - 1)?)
+            Ok(((if self.read_bit()? { 1 } else { 0 }) << (n - 1)) | self.read_bits(n - 1)?)
         }
     }
 
@@ -563,7 +573,7 @@ impl ByteBuffer {
     /// ```
     pub fn write_bits(&mut self, value: u64, n: u8) {
         if n > 0 {
-            self.write_bit((value >> n - 1) & 1 != 0);
+            self.write_bit((value >> (n - 1)) & 1 != 0);
             self.write_bits(value, n - 1);
         } else {
             self.write_bit((value & 1) != 0);
