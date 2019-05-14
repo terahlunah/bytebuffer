@@ -149,17 +149,35 @@ fn test_from_bytes() {
 #[test]
 fn test_read_bit() {
     let mut buffer = ByteBuffer::from_bytes(&vec![128]);
-    let bit1 = buffer.read_bit();
+    let bit1 = buffer.read_bit().unwrap();
     assert_eq!(bit1, true);
-    let bit2 = buffer.read_bit();
+    let bit2 = buffer.read_bit().unwrap();
     assert_eq!(bit2, false);
+}
+
+#[test]
+fn test_cannot_read_bit_outside_data() {
+    let mut buffer = ByteBuffer::new();
+    let result = buffer.read_bit();
+    assert!(result.is_err());
+    let error = result.err().unwrap();
+    assert_eq!(error.kind(), ErrorKind::UnexpectedEof);
 }
 
 #[test]
 fn test_read_bits() {
     let mut buffer = ByteBuffer::from_bytes(&vec![128]);
-    let value = buffer.read_bits(3);
+    let value = buffer.read_bits(3).unwrap();
     assert_eq!(value, 4);
+}
+
+#[test]
+fn test_cannot_read_more_than_64_bits() {
+    let mut buffer = ByteBuffer::from_bytes(&vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    let result = buffer.read_bits(73);
+    assert!(result.is_err());
+    let error = result.err().unwrap();
+    assert_eq!(error.kind(), ErrorKind::InvalidInput);
 }
 
 #[test]
@@ -189,7 +207,7 @@ fn test_flush_bit() {
     assert_eq!(buffer_result_1[1], 1);
 
     let mut buffer2 = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
-    let bit1 = buffer2.read_bit();
+    let bit1 = buffer2.read_bit().unwrap();
     let number1 = buffer2.read_i8().unwrap();
 
     assert_eq!(bit1, true);
@@ -259,12 +277,12 @@ fn test_debug() {
 #[test]
 fn test_debug_with_bit_reads() {
     let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
-    let first_four_bits = buffer.read_bits(4);
+    let first_four_bits = buffer.read_bits(4).unwrap();
     let debug_string = format!("{:?}", buffer);
     assert_eq!(buffer.get_rpos(), 0);
-    let next_four_bits = buffer.read_bits(4);
+    let next_four_bits = buffer.read_bits(4).unwrap();
     assert_eq!(buffer.get_rpos(), 1);
-    let remaining = buffer.read_bits(16);
+    let remaining = buffer.read_bits(16).unwrap();
     assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
     assert_eq!(first_four_bits, 0);
     assert_eq!(next_four_bits, 1);
@@ -298,4 +316,6 @@ overread_tests! {
     overread_i64: ByteBuffer::new().read_i64(),
     overread_f32: ByteBuffer::new().read_f32(),
     overread_f64: ByteBuffer::new().read_f64(),
+    overread_bit: ByteBuffer::new().read_bit(),
+    overread_bits: ByteBuffer::new().read_bits(1),
 }

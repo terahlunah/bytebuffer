@@ -423,7 +423,7 @@ impl ByteBuffer {
     }
 
     /// Set the reading cursor position.
-    /// *Note* : Set the reading cursor to `min(newPosition, self.len())` to prevent overflow
+    /// _Note_: Sets the reading cursor to `min(newPosition, self.len())` to prevent overflow
     pub fn set_rpos(&mut self, rpos: usize) {
         self.rpos = std::cmp::min(rpos, self.data.len());
     }
@@ -434,7 +434,7 @@ impl ByteBuffer {
     }
 
     /// Set the writing cursor position.
-    /// *Note* : Set the writing cursor to `min(newPosition, self.len())` to prevent overflow
+    /// _Note_: Sets the writing cursor to `min(newPosition, self.len())` to prevent overflow
     pub fn set_wpos(&mut self, wpos: usize) {
         self.wpos = std::cmp::min(wpos, self.data.len());
     }
@@ -448,53 +448,57 @@ impl ByteBuffer {
 
     /// Read 1 bit. Return true if the bit is set to 1, otherwhise, return false.
     ///
-    /// **Note** Bits are read from left to right
+    /// _Note_: Bits are read from left to right
     ///
     /// #Example
     ///
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![128]); // 10000000b
-    /// let value1 = buffer.read_bit(); //value1 contains true (eg: bit is 1)
-    /// let value2 = buffer.read_bit(); //value2 contains false (eg: bit is 0)
+    /// let value1 = buffer.read_bit().unwrap(); //value1 contains true (eg: bit is 1)
+    /// let value2 = buffer.read_bit().unwrap(); //value2 contains false (eg: bit is 0)
     /// ```
-    pub fn read_bit(&mut self) -> bool {
-        assert!(self.rpos <= self.data.len());
+    pub fn read_bit(&mut self) -> Result<bool> {
+        if self.rpos >= self.data.len() {
+            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+        }
         let bit = self.data[self.rpos] & (1 << 7 - self.rbit) != 0;
         self.rbit += 1;
         if self.rbit > 7 {
-            self.rbit = 0;
-            self.rpos += 1;
+            self.flush_rbit();
         }
-        bit
+        Ok(bit)
     }
 
     /// Read n bits. an return the corresponding value an u64.
     ///
-    /// **Note 1** : We cannot read more than 64 bits
+    /// _Note_: We cannot read more than 64 bits
     ///
-    /// **Note 2** Bits are read from left to right
+    /// _Note_: Bits are read from left to right
     ///
     /// #Example
     ///
     /// ```
     /// #  use bytebuffer::*;
     /// let mut buffer = ByteBuffer::from_bytes(&vec![128]); // 10000000b
-    /// let value = buffer.read_bits(3); // value contains 4 (eg: 100b)
+    /// let value = buffer.read_bits(3).unwrap(); // value contains 4 (eg: 100b)
     /// ```
-    pub fn read_bits(&mut self, n: u8) -> u64 {
-        // TODO : Assert that n <= 64
-        if n > 0 {
-            ((if self.read_bit() { 1 } else { 0 }) << n - 1) | self.read_bits(n - 1)
+    pub fn read_bits(&mut self, n: u8) -> Result<u64> {
+        if n > 64 {
+            return Err(Error::new(ErrorKind::InvalidInput, "cannot read more than 64 bits"));
+        }
+
+        if n == 0 {
+            Ok(0)
         } else {
-            0
+            Ok(((if self.read_bit()? { 1 } else { 0 }) << n - 1) | self.read_bits(n - 1)?)
         }
     }
 
-    /// Discard all the pending bits available for reading or writing and place the the corresponding cursor to the next byte.
+    /// Discard all the pending bits available for reading or writing and place the corresponding cursor to the next byte.
     ///
-    /// **Note 1** : If no bits are currently read or written, this function does nothing.
-    /// **Note 2** : This function is automatically called for each write or read operations.
+    /// _Note_: If no bits are currently read or written, this function does nothing.
+    ///
     /// #Example
     ///
     /// ```text
@@ -507,18 +511,25 @@ impl ByteBuffer {
     /// ```
     pub fn flush_bit(&mut self) {
         if self.rbit > 0 {
-            self.rpos += 1;
-            self.rbit = 0
+            self.flush_rbit();
         }
-
         if self.wbit > 0 {
-            self.wpos += 1;
-            self.wbit = 0
+            self.flush_wbit();
         }
     }
 
+    fn flush_rbit(&mut self) {
+        self.rpos += 1;
+        self.rbit = 0
+    }
+
+    fn flush_wbit(&mut self) {
+        self.wpos += 1;
+        self.wbit = 0
+    }
+
     /// Append 1 bit value to the buffer.
-    /// The bit is happened like this :
+    /// The bit is appended like this :
     ///
     /// ```text
     /// ...| XXXXXXXX | 10000000 |....
