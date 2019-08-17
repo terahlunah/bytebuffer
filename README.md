@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/terahlunah/rust-bytebuffer.svg?branch=master)](https://travis-ci.org/terahlunah/rust-bytebuffer)
-[![Crates.io](https://img.shields.io/crates/v/bytebuffer.svg)](https://crates.io/crates/bytebuffer)
-[![Documentation](https://docs.rs/bytebuffer/badge.svg)](https://docs.rs/bytebuffer)
+[![Build Status](https://travis-ci.org/terahlunah/bytebuffer-rs.svg?branch=master)](https://travis-ci.org/terahlunah/bytebuffer-rs)
+[![Crates.io](https://img.shields.io/crates/v/bytebuffer-rs.svg)](https://crates.io/crates/bytebuffer-rs)
+[![Documentation](https://docs.rs/bytebuffer-rs/badge.svg)](https://docs.rs/bytebuffer-rs)
 
 ## License
 

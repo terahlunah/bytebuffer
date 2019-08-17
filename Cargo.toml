@@ -1,16 +1,19 @@
 [package]
-name = "bytebuffer"
+name = "bytebuffer-rs"
 version = "0.2.1"
 authors = ["Terah <terah.dev@gmail.com>", "Shiroy <awacheux.utc@gmail.com>"]
-description = "A byte buffer for networking and binary protocols"
-homepage = "https://github.com/Terah-/rust-bytebuffer"
-repository = "https://github.com/Terah-/rust-bytebuffer"
-keywords = ["byte", "buffer", "network", "protocol"]
+description = "A bytebuffer for networking and binary protocols"
+homepage = "https://github.com/terahlunah/bytebuffer-rs"
+repository = "https://github.com/terahlunah/bytebuffer-rs"
+keywords = ["byte", "buffer", "network", "protocol", "bytebuffer"]
 license = "MIT OR Apache-2.0"
+
+[lib]
+name = "bytebuffer"
 
 [dependencies]
 byteorder = "0.3"
 
 [badges]
-travis-ci = { repository = "terahxluna/rust-bytebuffer" }
+travis-ci = { repository = "terahlunah/bytebuffer-rs" }
 
