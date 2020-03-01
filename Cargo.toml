@@ -1,6 +1,6 @@
 [package]
 name = "bytebuffer-rs"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Terah <terah.dev@gmail.com>", "Shiroy <awacheux.utc@gmail.com>"]
 description = "A bytebuffer for networking and binary protocols"
 homepage = "https://github.com/terahlunah/bytebuffer-rs"
@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 name = "bytebuffer"
 
 [dependencies]
-byteorder = "0.3"
+byteorder = "1"
 
 [badges]
 travis-ci = { repository = "terahlunah/bytebuffer-rs" }
