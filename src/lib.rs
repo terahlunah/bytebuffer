@@ -67,9 +67,10 @@ impl ByteBuffer {
     /// Constructs a new ByteBuffer from an existing vector. This
     /// function takes ownership of the vector
     pub fn from_vec(vec: Vec<u8>) -> ByteBuffer {
+        let len = vec.len();
         ByteBuffer {
             data: vec,
-            wpos: vec.len(),
+            wpos: len,
             rpos: 0,
             rbit: 0,
             wbit: 0,
@@ -431,7 +432,7 @@ impl ByteBuffer {
     // Other
 
     /// Dump the byte buffer to a string.
-    pub fn to_string(&self) -> String {
+    pub fn to_hex_dump(&self) -> String {
         let mut str = String::new();
         for b in &self.data {
             str = str + &format!("0x{:01$x} ", b, 2);
