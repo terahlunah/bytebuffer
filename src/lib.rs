@@ -53,7 +53,7 @@ impl ByteBuffer {
             rpos: 0,
             rbit: 0,
             wbit: 0,
-            endian: Endian::BigEndian,       
+            endian: Endian::BigEndian,
         }
     }
 
@@ -62,6 +62,19 @@ impl ByteBuffer {
         let mut buffer = ByteBuffer::new();
         buffer.write_bytes(bytes);
         buffer
+    }
+
+    /// Constructs a new ByteBuffer from an existing vector. This
+    /// function takes ownership of the vector
+    pub fn from_vec(vec: Vec<u8>) -> ByteBuffer {
+        ByteBuffer {
+            data: vec,
+            wpos: vec.len(),
+            rpos: 0,
+            rbit: 0,
+            wbit: 0,
+            endian: Endian::BigEndian,
+        }
     }
 
     /// Return the buffer size
@@ -161,7 +174,7 @@ impl ByteBuffer {
     /// ```
     pub fn write_u16(&mut self, val: u16) {
         let mut buf = [0; 2];
-        
+
         match self.endian{
             Endian::BigEndian => BigEndian::write_u16(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_u16(&mut buf, val),
@@ -188,7 +201,7 @@ impl ByteBuffer {
     /// ```
     pub fn write_u32(&mut self, val: u32) {
         let mut buf = [0; 4];
-        
+
         match self.endian{
             Endian::BigEndian => BigEndian::write_u32(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_u32(&mut buf, val),
@@ -241,7 +254,7 @@ impl ByteBuffer {
     /// ```
     pub fn write_f32(&mut self, val: f32) {
         let mut buf = [0; 4];
-        
+
         match self.endian{
             Endian::BigEndian => BigEndian::write_f32(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_f32(&mut buf, val),
