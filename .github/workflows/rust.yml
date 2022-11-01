@@ -1,4 +1,4 @@
-name: Rust CI
+name: CI Checks
 
 on:
   workflow_dispatch:
