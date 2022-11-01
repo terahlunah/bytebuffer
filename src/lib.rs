@@ -590,7 +590,7 @@ impl ByteBuffer {
         }
     }
 
-    /// Write the given 
+    /// Write the given value as a sequence of n bits 
     ///
     /// #Example
     ///
