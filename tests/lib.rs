@@ -264,7 +264,40 @@ fn test_write() {
 fn test_flush() {
     let mut buffer = ByteBuffer::new();
     buffer.flush().unwrap();
+
 }
+
+#[test]
+fn cloning_and_read(){
+    let mut buffer = ByteBuffer::new();
+    for i in 0..10u8 {
+        buffer.write_u8(i);
+    }
+
+
+    let mut clone = buffer.clone();
+    for i in 0..10u8 {
+        assert_eq!(i, clone.read_u8().unwrap());
+    }
+}
+
+#[test]
+fn cursors_reset(){
+    let mut buffer = ByteBuffer::new();
+    for i in 0..10u8 {
+        buffer.write_u8(i);
+        buffer.read_u8().unwrap();
+    }
+
+    buffer.reset_cursors();
+    
+    for i in 0..10u8 {
+        assert_eq!(i, buffer.read_u8().unwrap());
+    }
+}
+
+
+
 
 #[test]
 fn test_debug() {
