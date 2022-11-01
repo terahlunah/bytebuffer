@@ -15,6 +15,3 @@ name = "bytebuffer"
 [dependencies]
 byteorder = "1"
 
-[badges]
-travis-ci = { repository = "terahlunah/bytebuffer-rs" }
-
