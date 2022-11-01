@@ -1,7 +1,8 @@
-extern crate byteorder;
-
-use byteorder::{ByteOrder, BigEndian, LittleEndian};
-use std::io::{Read, Write, Result, Error, ErrorKind};
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
+use std::{
+    fmt::Debug,
+    io::{Error, ErrorKind, Read, Result, Write},
+};
 
 /// An enum to represent the byte order of the ByteBuffer object
 #[derive(Debug, Clone, Copy)]
@@ -11,6 +12,7 @@ pub enum Endian {
 }
 
 /// A byte buffer object specifically turned to easily read and write binary values
+#[derive(Clone)]
 pub struct ByteBuffer {
     data: Vec<u8>,
     wpos: usize,
@@ -21,21 +23,22 @@ pub struct ByteBuffer {
 }
 
 macro_rules! read_number {
-    ($self:ident, $name:ident, $offset:expr) => {
-        {
-            $self.flush_bit();
-            if $self.rpos + $offset > $self.data.len() {
-                return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
-            }
-            let range = $self.rpos..$self.rpos + $offset;
-            $self.rpos += $offset;
-
-            Ok(match $self.endian{
-                Endian::BigEndian => BigEndian::$name(&$self.data[range]),
-                Endian::LittleEndian => LittleEndian::$name(&$self.data[range]),
-            })
+    ($self:ident, $name:ident, $offset:expr) => {{
+        $self.flush_bit();
+        if $self.rpos + $offset > $self.data.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
         }
-    }
+        let range = $self.rpos..$self.rpos + $offset;
+        $self.rpos += $offset;
+
+        Ok(match $self.endian {
+            Endian::BigEndian => BigEndian::$name(&$self.data[range]),
+            Endian::LittleEndian => LittleEndian::$name(&$self.data[range]),
+        })
+    }};
 }
 
 impl Default for ByteBuffer {
@@ -78,7 +81,6 @@ impl ByteBuffer {
         }
     }
 
-
     /// Return the buffer size
     pub fn len(&self) -> usize {
         self.data.len()
@@ -96,17 +98,16 @@ impl ByteBuffer {
     }
 
     /// Reinitialize the reading and writing cursor
-    pub fn reset_cursors(&mut self){
+    pub fn reset_cursors(&mut self) {
         self.wpos = 0;
         self.rpos = 0;
     }
-    
+
     /// Reinitialize the bit reading and bit writing cursor
-    pub fn reset_bits_cursors(&mut self){
+    pub fn reset_bits_cursors(&mut self) {
         self.rbit = 0;
         self.wbit = 0;
     }
-
 
     /// Change the buffer size to size.
     ///
@@ -190,7 +191,7 @@ impl ByteBuffer {
     pub fn write_u16(&mut self, val: u16) {
         let mut buf = [0; 2];
 
-        match self.endian{
+        match self.endian {
             Endian::BigEndian => BigEndian::write_u16(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_u16(&mut buf, val),
         };
@@ -217,7 +218,7 @@ impl ByteBuffer {
     pub fn write_u32(&mut self, val: u32) {
         let mut buf = [0; 4];
 
-        match self.endian{
+        match self.endian {
             Endian::BigEndian => BigEndian::write_u32(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_u32(&mut buf, val),
         };
@@ -243,7 +244,7 @@ impl ByteBuffer {
     /// ```
     pub fn write_u64(&mut self, val: u64) {
         let mut buf = [0; 8];
-        match self.endian{
+        match self.endian {
             Endian::BigEndian => BigEndian::write_u64(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_u64(&mut buf, val),
         };
@@ -270,7 +271,7 @@ impl ByteBuffer {
     pub fn write_f32(&mut self, val: f32) {
         let mut buf = [0; 4];
 
-        match self.endian{
+        match self.endian {
             Endian::BigEndian => BigEndian::write_f32(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_f32(&mut buf, val),
         };
@@ -291,7 +292,7 @@ impl ByteBuffer {
     pub fn write_f64(&mut self, val: f64) {
         let mut buf = [0; 8];
 
-        match self.endian{
+        match self.endian {
             Endian::BigEndian => BigEndian::write_f64(&mut buf, val),
             Endian::LittleEndian => LittleEndian::write_f64(&mut buf, val),
         };
@@ -323,7 +324,10 @@ impl ByteBuffer {
     pub fn read_bytes(&mut self, size: usize) -> Result<Vec<u8>> {
         self.flush_bit();
         if self.rpos + size > self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bytes from buffer"))
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bytes from buffer",
+            ));
         }
         let range = self.rpos..self.rpos + size;
         let mut res = Vec::<u8>::new();
@@ -345,7 +349,10 @@ impl ByteBuffer {
     pub fn read_u8(&mut self) -> Result<u8> {
         self.flush_bit();
         if self.rpos >= self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
         }
         let pos = self.rpos;
         self.rpos += 1;
@@ -436,10 +443,9 @@ impl ByteBuffer {
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_string(&mut self) -> Result<String> {
         let size = self.read_u32()?;
-        match String::from_utf8(self.read_bytes(size as usize)?)
-        {
+        match String::from_utf8(self.read_bytes(size as usize)?) {
             Ok(string_result) => Ok(string_result),
-            Err(e) => Err(Error::new(ErrorKind::InvalidData, e))
+            Err(e) => Err(Error::new(ErrorKind::InvalidData, e)),
         }
     }
 
@@ -498,7 +504,10 @@ impl ByteBuffer {
     /// ```
     pub fn read_bit(&mut self) -> Result<bool> {
         if self.rpos >= self.data.len() {
-            return Err(Error::new(ErrorKind::UnexpectedEof, "could not read enough bits from buffer"))
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
         }
         let bit = self.data[self.rpos] & (1 << (7 - self.rbit)) != 0;
         self.rbit += 1;
@@ -523,7 +532,10 @@ impl ByteBuffer {
     /// ```
     pub fn read_bits(&mut self, n: u8) -> Result<u64> {
         if n > 64 {
-            return Err(Error::new(ErrorKind::InvalidInput, "cannot read more than 64 bits"));
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "cannot read more than 64 bits",
+            ));
         }
 
         if n == 0 {
@@ -590,7 +602,7 @@ impl ByteBuffer {
         }
     }
 
-    /// Write the given value as a sequence of n bits 
+    /// Write the given value as a sequence of n bits
     ///
     /// #Example
     ///
@@ -607,8 +619,6 @@ impl ByteBuffer {
             self.write_bit((value & 1) != 0);
         }
     }
-
-    
 }
 
 impl Read for ByteBuffer {
@@ -616,7 +626,7 @@ impl Read for ByteBuffer {
         self.flush_bit();
         let read_len = std::cmp::min(self.data.len() - self.rpos, buf.len());
         let range = self.rpos..self.rpos + read_len;
-        for (i, val) in (&self.data[range]).iter().enumerate() {
+        for (i, val) in self.data[range].iter().enumerate() {
             buf[i] = *val;
         }
         self.rpos += read_len;
@@ -635,7 +645,7 @@ impl Write for ByteBuffer {
     }
 }
 
-impl std::fmt::Debug for ByteBuffer {
+impl Debug for ByteBuffer {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let rpos = if self.rbit > 0 {
             self.rpos + 1
@@ -646,25 +656,14 @@ impl std::fmt::Debug for ByteBuffer {
         let read_len = self.data.len() - rpos;
         let mut remaining_data = vec![0; read_len];
         let range = rpos..rpos + read_len;
-        for (i, val) in (&self.data[range]).iter().enumerate() {
+        for (i, val) in self.data[range].iter().enumerate() {
             remaining_data[i] = *val;
         }
 
-        write!(f, "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
-               remaining_data, self.data, self.endian)
-    }
-}
-
-
-impl Clone for ByteBuffer {
-    fn clone(&self) -> Self {
-        Self { 
-            data: self.data.clone(), 
-            wpos: self.wpos.clone(), 
-            rpos: self.rpos.clone(), 
-            rbit: self.rbit.clone(), 
-            wbit: self.wbit.clone(), 
-            endian: self.endian.clone() 
-        }
+        write!(
+            f,
+            "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
+            remaining_data, self.data, self.endian
+        )
     }
 }
