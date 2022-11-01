@@ -1,5 +1,6 @@
 [![Crates.io](https://img.shields.io/crates/v/bytebuffer-rs.svg)](https://crates.io/crates/bytebuffer-rs)
-[![Documentation](https://docs.rs/bytebuffer-rs/badge.svg)](https://docs.rs/bytebuffer-rs)
+[![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/async-graphql)
+[![CI Checks](https://github.com/terahlunah/bytebuffer-rs/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer-rs/actions/workflows/rust.yml)
 
 ## License
 
