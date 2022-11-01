@@ -5,7 +5,7 @@ use std::io::{Read, Write, Result, Error, ErrorKind};
 
 /// An enum to represent the byte order of the ByteBuffer object
 #[derive(Debug, Clone, Copy)]
-pub enum Endian{
+pub enum Endian {
     BigEndian,
     LittleEndian,
 }
@@ -78,6 +78,7 @@ impl ByteBuffer {
         }
     }
 
+
     /// Return the buffer size
     pub fn len(&self) -> usize {
         self.data.len()
@@ -87,12 +88,25 @@ impl ByteBuffer {
         self.data.is_empty()
     }
 
-    /// Clear the buffer and reinitialize the reading and writing cursor
+    /// Clear the buffer and reinitialize the reading and writing cursors
     pub fn clear(&mut self) {
         self.data.clear();
+        self.reset_cursors();
+        self.reset_bits_cursors();
+    }
+
+    /// Reinitialize the reading and writing cursor
+    pub fn reset_cursors(&mut self){
         self.wpos = 0;
         self.rpos = 0;
     }
+    
+    /// Reinitialize the bit reading and bit writing cursor
+    pub fn reset_bits_cursors(&mut self){
+        self.rbit = 0;
+        self.wbit = 0;
+    }
+
 
     /// Change the buffer size to size.
     ///
@@ -576,7 +590,7 @@ impl ByteBuffer {
         }
     }
 
-    /// Write the given value as a sequence of n bits
+    /// Write the given 
     ///
     /// #Example
     ///
@@ -593,6 +607,8 @@ impl ByteBuffer {
             self.write_bit((value & 1) != 0);
         }
     }
+
+    
 }
 
 impl Read for ByteBuffer {
@@ -636,5 +652,19 @@ impl std::fmt::Debug for ByteBuffer {
 
         write!(f, "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
                remaining_data, self.data, self.endian)
+    }
+}
+
+
+impl Clone for ByteBuffer {
+    fn clone(&self) -> Self {
+        Self { 
+            data: self.data.clone(), 
+            wpos: self.wpos.clone(), 
+            rpos: self.rpos.clone(), 
+            rbit: self.rbit.clone(), 
+            wbit: self.wbit.clone(), 
+            endian: self.endian.clone() 
+        }
     }
 }
