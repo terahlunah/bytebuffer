@@ -1,7 +1,7 @@
 extern crate bytebuffer;
 
 use bytebuffer::*;
-use std::io::{Read, Write, ErrorKind};
+use std::io::{ErrorKind, Read, Write};
 
 #[test]
 fn test_empty() {
@@ -25,7 +25,7 @@ fn test_u16() {
 }
 
 #[test]
-fn test_u16_little_endian(){
+fn test_u16_little_endian() {
     let mut buffer = ByteBuffer::new();
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_u16(0xF0E1);
@@ -84,7 +84,6 @@ fn test_string() {
     assert_eq!(buffer.read_string().unwrap(), "hello");
 }
 
-
 #[test]
 fn test_mixed() {
     let mut buffer = ByteBuffer::new();
@@ -111,9 +110,11 @@ fn test_string_overread_protection() {
 fn test_to_string() {
     let mut buffer = ByteBuffer::new();
     buffer.write_string("hello");
-    assert_eq!(buffer.to_hex_dump(), "0x00 0x00 0x00 0x05 0x68 0x65 0x6c 0x6c 0x6f");
+    assert_eq!(
+        buffer.to_hex_dump(),
+        "0x00 0x00 0x00 0x05 0x68 0x65 0x6c 0x6c 0x6f"
+    );
 }
-
 
 #[test]
 fn test_wpos() {
@@ -264,16 +265,14 @@ fn test_write() {
 fn test_flush() {
     let mut buffer = ByteBuffer::new();
     buffer.flush().unwrap();
-
 }
 
 #[test]
-fn cloning_and_read(){
+fn cloning_and_read() {
     let mut buffer = ByteBuffer::new();
     for i in 0..10u8 {
         buffer.write_u8(i);
     }
-
 
     let mut clone = buffer.clone();
     for i in 0..10u8 {
@@ -282,7 +281,7 @@ fn cloning_and_read(){
 }
 
 #[test]
-fn cursors_reset(){
+fn cursors_reset() {
     let mut buffer = ByteBuffer::new();
     for i in 0..10u8 {
         buffer.write_u8(i);
@@ -290,21 +289,21 @@ fn cursors_reset(){
     }
 
     buffer.reset_cursors();
-    
+
     for i in 0..10u8 {
         assert_eq!(i, buffer.read_u8().unwrap());
     }
 }
-
-
-
 
 #[test]
 fn test_debug() {
     let mut buffer = ByteBuffer::from_bytes(&[0x1, 0xFF, 0x45]);
     buffer.read_u8().unwrap();
     let debug_string = format!("{:?}", buffer);
-    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
+    assert_eq!(
+        &debug_string,
+        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }"
+    );
 }
 
 #[test]
@@ -316,7 +315,10 @@ fn test_debug_with_bit_reads() {
     let next_four_bits = buffer.read_bits(4).unwrap();
     assert_eq!(buffer.get_rpos(), 1);
     let remaining = buffer.read_bits(16).unwrap();
-    assert_eq!(&debug_string, "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }");
+    assert_eq!(
+        &debug_string,
+        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }"
+    );
     assert_eq!(first_four_bits, 0);
     assert_eq!(next_four_bits, 1);
     assert_eq!(remaining, 65349);
