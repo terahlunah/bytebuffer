@@ -541,7 +541,7 @@ impl ByteBuffer {
         if n == 0 {
             Ok(0)
         } else {
-            Ok(((if self.read_bit()? { 1 } else { 0 }) << (n - 1)) | self.read_bits(n - 1)?)
+            Ok((u64::from(self.read_bit()?) << (n - 1)) | self.read_bits(n - 1)?)
         }
     }
 
