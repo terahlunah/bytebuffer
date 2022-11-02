@@ -5,14 +5,14 @@ use std::{
 };
 
 /// An enum to represent the byte order of the ByteBuffer object
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Endian {
     BigEndian,
     LittleEndian,
 }
 
 /// A byte buffer object specifically turned to easily read and write binary values
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ByteBuffer {
     data: Vec<u8>,
     wpos: usize,
@@ -22,9 +22,74 @@ pub struct ByteBuffer {
     endian: Endian,
 }
 
+impl From<Vec<u8>> for ByteBuffer {
+    fn from(val: Vec<u8>) -> Self {
+        ByteBuffer::from_vec(val)
+    }
+}
+
+impl From<ByteBuffer> for Vec<u8> {
+    fn from(val: ByteBuffer) -> Self {
+        val.into_bytes()
+    }
+}
+
+impl Default for ByteBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Read for ByteBuffer {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
+        self.flush_bits();
+        let read_len = std::cmp::min(self.data.len() - self.rpos, buf.len());
+        let range = self.rpos..self.rpos + read_len;
+        for (i, val) in self.data[range].iter().enumerate() {
+            buf[i] = *val;
+        }
+        self.rpos += read_len;
+        Ok(read_len)
+    }
+}
+
+impl Write for ByteBuffer {
+    fn write(&mut self, buf: &[u8]) -> Result<usize> {
+        self.write_bytes(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl Debug for ByteBuffer {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let rpos = if self.rbit > 0 {
+            self.rpos + 1
+        } else {
+            self.rpos
+        };
+
+        let read_len = self.data.len() - rpos;
+        let mut remaining_data = vec![0; read_len];
+        let range = rpos..rpos + read_len;
+        for (i, val) in self.data[range].iter().enumerate() {
+            remaining_data[i] = *val;
+        }
+
+        write!(
+            f,
+            "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
+            remaining_data, self.data, self.endian
+        )
+    }
+}
+
 macro_rules! read_number {
     ($self:ident, $name:ident, $offset:expr) => {{
-        $self.flush_bit();
+        $self.flush_bits();
         if $self.rpos + $offset > $self.data.len() {
             return Err(Error::new(
                 ErrorKind::UnexpectedEof,
@@ -39,12 +104,6 @@ macro_rules! read_number {
             Endian::LittleEndian => LittleEndian::$name(&$self.data[range]),
         })
     }};
-}
-
-impl Default for ByteBuffer {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl ByteBuffer {
@@ -144,7 +203,7 @@ impl ByteBuffer {
     /// buffer.write_bytes(&vec![0x1, 0xFF, 0x45]); // buffer contains [0x1, 0xFF, 0x45]
     /// ```
     pub fn write_bytes(&mut self, bytes: &[u8]) {
-        self.flush_bit();
+        self.flush_bits();
 
         let size = bytes.len() + self.wpos;
 
@@ -322,7 +381,7 @@ impl ByteBuffer {
     /// available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_bytes(&mut self, size: usize) -> Result<Vec<u8>> {
-        self.flush_bit();
+        self.flush_bits();
         if self.rpos + size > self.data.len() {
             return Err(Error::new(
                 ErrorKind::UnexpectedEof,
@@ -347,7 +406,7 @@ impl ByteBuffer {
     /// let value = buffer.read_u8().unwrap(); //Value contains 1
     /// ```
     pub fn read_u8(&mut self) -> Result<u8> {
-        self.flush_bit();
+        self.flush_bits();
         if self.rpos >= self.data.len() {
             return Err(Error::new(
                 ErrorKind::UnexpectedEof,
@@ -483,8 +542,13 @@ impl ByteBuffer {
         self.wpos = std::cmp::min(wpos, self.data.len());
     }
 
-    /// Return the raw byte buffer.
-    pub fn to_bytes(&self) -> Vec<u8> {
+    /// Return the raw byte buffer bytes.
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.data
+    }
+
+    /// Return the raw byte buffer as a Vec<u8>.
+    pub fn into_bytes(&self) -> Vec<u8> {
         self.data.to_vec()
     }
 
@@ -512,7 +576,7 @@ impl ByteBuffer {
         let bit = self.data[self.rpos] & (1 << (7 - self.rbit)) != 0;
         self.rbit += 1;
         if self.rbit > 7 {
-            self.flush_rbit();
+            self.flush_rbits();
         }
         Ok(bit)
     }
@@ -559,21 +623,21 @@ impl ByteBuffer {
     /// 10010010 | 00000001 // flush_bit() called
     ///            ^
     /// ```
-    pub fn flush_bit(&mut self) {
+    pub fn flush_bits(&mut self) {
         if self.rbit > 0 {
-            self.flush_rbit();
+            self.flush_rbits();
         }
         if self.wbit > 0 {
-            self.flush_wbit();
+            self.flush_wbits();
         }
     }
 
-    fn flush_rbit(&mut self) {
+    fn flush_rbits(&mut self) {
         self.rpos += 1;
         self.rbit = 0
     }
 
-    fn flush_wbit(&mut self) {
+    fn flush_wbits(&mut self) {
         self.wpos += 1;
         self.wbit = 0
     }
@@ -618,52 +682,5 @@ impl ByteBuffer {
         } else {
             self.write_bit((value & 1) != 0);
         }
-    }
-}
-
-impl Read for ByteBuffer {
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        self.flush_bit();
-        let read_len = std::cmp::min(self.data.len() - self.rpos, buf.len());
-        let range = self.rpos..self.rpos + read_len;
-        for (i, val) in self.data[range].iter().enumerate() {
-            buf[i] = *val;
-        }
-        self.rpos += read_len;
-        Ok(read_len)
-    }
-}
-
-impl Write for ByteBuffer {
-    fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        self.write_bytes(buf);
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> Result<()> {
-        Ok(())
-    }
-}
-
-impl Debug for ByteBuffer {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let rpos = if self.rbit > 0 {
-            self.rpos + 1
-        } else {
-            self.rpos
-        };
-
-        let read_len = self.data.len() - rpos;
-        let mut remaining_data = vec![0; read_len];
-        let range = rpos..rpos + read_len;
-        for (i, val) in self.data[range].iter().enumerate() {
-            remaining_data[i] = *val;
-        }
-
-        write!(
-            f,
-            "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
-            remaining_data, self.data, self.endian
-        )
     }
 }
