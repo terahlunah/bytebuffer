@@ -1,6 +1,6 @@
-[![Crates.io](https://img.shields.io/crates/v/bytebuffer-rs.svg)](https://crates.io/crates/bytebuffer-rs)
-[![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/bytebuffer-rs)
-[![CI Checks](https://github.com/terahlunah/bytebuffer-rs/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer-rs/actions/workflows/rust.yml)
+[![Crates.io](https://img.shields.io/crates/v/bytebuffer.svg)](https://crates.io/crates/bytebuffer)
+[![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/bytebuffer)
+[![CI Checks](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml)
 
 ### A bytebuffer implementation for Rust
 

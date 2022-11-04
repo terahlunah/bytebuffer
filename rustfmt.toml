@@ -1,3 +1,4 @@
+edition = "2021"
 reorder_imports = true
 imports_granularity = "Crate"
 group_imports = "One"
