@@ -1,13 +1,21 @@
-[![Crates.io](https://img.shields.io/crates/v/bytebuffer.svg)](https://crates.io/crates/bytebuffer)
-[![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/bytebuffer)
-[![CI Checks](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml)
-
-### A bytebuffer implementation for Rust
+# `bytebuffer`
 
 ---
 
+[![Crates.io](https://img.shields.io/crates/v/bytebuffer.svg?color=orange)](https://crates.io/crates/bytebuffer)
+[![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/bytebuffer)
+[![CI Checks](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml)
+
 This crate provides an easy to use api to read / write data from / to a bunch of bytes.
 
+```
+[dependencies]
+bytebuffer = "2.0.1"
+```
+
+---
+
+### Api sample
 
 ```rust
 use bytebuffer::ByteBuffer;
