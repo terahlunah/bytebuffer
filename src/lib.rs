@@ -1,3 +1,5 @@
+#![deny(clippy::all)]
+
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
 use std::{
     fmt::Debug,
