@@ -338,7 +338,7 @@ fn test_debug() {
     let debug_string = format!("{:?}", buffer);
     assert_eq!(
         &debug_string,
-        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }"
+        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], wpos: 3, rpos: 1, endian: BigEndian }"
     );
 }
 
@@ -353,7 +353,7 @@ fn test_debug_with_bit_reads() {
     let remaining = buffer.read_bits(16).unwrap();
     assert_eq!(
         &debug_string,
-        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], endian: BigEndian }"
+        "ByteBuffer { remaining_data: [255, 69], total_data: [1, 255, 69], wpos: 3, rpos: 0, endian: BigEndian }"
     );
     assert_eq!(first_four_bits, 0);
     assert_eq!(next_four_bits, 1);
