@@ -171,6 +171,14 @@ fn test_rpos() {
 }
 
 #[test]
+fn test_as_bytes() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u8(0xFE);
+    buffer.write_u8(0xFF);
+    assert_eq!(buffer.as_bytes(), [0xFE, 0xFF]);
+}
+
+#[test]
 fn test_to_bytes() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
@@ -249,6 +257,30 @@ fn test_flush_bit() {
 
     assert_eq!(bit1, true);
     assert_eq!(number1, 1);
+}
+
+#[test]
+fn test_flush_bits() {
+    let mut buffer = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
+    let bit1 = buffer.read_bit().unwrap();
+    let rpos1 = buffer.get_rpos();
+    /*
+     * 11111111 | 00000001
+     *  ^
+     */
+    assert_eq!(bit1, true);
+    assert_eq!(rpos1, 0);
+
+    buffer.flush_bits();
+
+    let bit2 = buffer.read_bit().unwrap();
+    let rpos2 = buffer.get_rpos();
+    /*
+     * 11111111 | 00000001
+     *             ^
+     */
+    assert_eq!(bit2, false);
+    assert_eq!(rpos2, 1)
 }
 
 #[test]
