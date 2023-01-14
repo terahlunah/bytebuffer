@@ -83,8 +83,8 @@ impl Debug for ByteBuffer {
 
         write!(
             f,
-            "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, endian: {:?} }}",
-            remaining_data, self.data, self.endian
+            "ByteBuffer {{ remaining_data: {:?}, total_data: {:?}, wpos: {:?}, rpos: {:?}, endian: {:?} }}",
+            remaining_data, self.data, self.wpos, self.rpos, self.endian
         )
     }
 }
