@@ -10,7 +10,7 @@ This crate provides an easy to use api to read / write data from / to a bunch of
 
 ```
 [dependencies]
-bytebuffer = "2.0.1"
+bytebuffer = "2.1.0"
 ```
 
 ---
@@ -19,6 +19,8 @@ bytebuffer = "2.0.1"
 
 ```rust
 use bytebuffer::ByteBuffer;
+
+// Writing
 
 let mut buffer = ByteBuffer::new();
 buffer.write_bytes(&vec![0x1, 0xFF, 0x45]);
@@ -37,23 +39,29 @@ buffer.write_bit(true);
 buffer.write_bits(4, 3);
 buffer.flush_bits();
 
-let data = buffer.into_bytes();
+let data = buffer.into_vec();
 
-let mut buffer = ByteBuffer::from_vec(data);
-let _ = buffer.read_bytes(3);
-let _ = buffer.read_u8();
-let _ = buffer.read_i8();
-let _ = buffer.read_u16();
-let _ = buffer.read_i16();
-let _ = buffer.read_u32();
-let _ = buffer.read_i32();
-let _ = buffer.read_u64();
-let _ = buffer.read_i64();
-let _ = buffer.read_f32();
-let _ = buffer.read_f64();
-let _ = buffer.read_string();
-let _ = buffer.read_bit();
-let _ = buffer.read_bits(3);
+
+// Reading 
+
+let mut reader = ByteBuffer::from(data);
+// or
+let mut reader = ByteReader::from(&data);
+
+let _ = reader.read_bytes(3);
+let _ = reader.read_u8();
+let _ = reader.read_i8();
+let _ = reader.read_u16();
+let _ = reader.read_i16();
+let _ = reader.read_u32();
+let _ = reader.read_i32();
+let _ = reader.read_u64();
+let _ = reader.read_i64();
+let _ = reader.read_f32();
+let _ = reader.read_f64();
+let _ = reader.read_string();
+let _ = reader.read_bit();
+let _ = reader.read_bits(3);
 ```
 
 ---
