@@ -1,4 +1,4 @@
-use bytebuffer::*;
+use bytebuffer::{ByteBuffer, Endian};
 use std::io::{ErrorKind, Read, Write};
 
 #[test]
@@ -20,7 +20,7 @@ fn test_api() {
     buffer.write_bits(4, 3);
     buffer.flush_bits();
 
-    let data = buffer.into_bytes();
+    let data = buffer.into_vec();
 
     let mut buffer = ByteBuffer::from_vec(data);
     let _ = buffer.read_bytes(3);
@@ -42,8 +42,19 @@ fn test_api() {
 #[test]
 fn test_empty() {
     let mut buffer = ByteBuffer::new();
+    assert_eq!(buffer.is_empty(), true);
+    buffer.write_u8(1);
+    assert_eq!(buffer.is_empty(), false);
+}
+
+#[test]
+fn test_len() {
+    let mut buffer = ByteBuffer::new();
+    assert_eq!(buffer.len(), 0);
     buffer.write_u8(1);
     assert_eq!(buffer.len(), 1);
+    buffer.write_u32(1);
+    assert_eq!(buffer.len(), 5);
 }
 
 #[test]
@@ -182,7 +193,7 @@ fn test_as_bytes() {
 fn test_to_bytes() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
-    assert_eq!(buffer.into_bytes(), vec![0xFF]);
+    assert_eq!(buffer.into_vec(), vec![0xFF]);
 }
 
 #[test]
@@ -231,14 +242,14 @@ fn test_write_bit() {
     buffer.write_bit(true);
     buffer.write_bit(true);
     buffer.write_bit(false);
-    assert_eq!(buffer.into_bytes()[0], 128 + 64);
+    assert_eq!(buffer.into_vec()[0], 128 + 64);
 }
 
 #[test]
 fn test_write_bits() {
     let mut buffer = ByteBuffer::new();
     buffer.write_bits(6, 3); // 110b
-    assert_eq!(buffer.into_bytes()[0], 128 + 64);
+    assert_eq!(buffer.into_vec()[0], 128 + 64);
 }
 
 #[test]
@@ -247,7 +258,7 @@ fn test_flush_bit() {
     buffer.write_bit(true);
     buffer.write_i8(1);
 
-    let buffer_result_1 = buffer.into_bytes();
+    let buffer_result_1 = buffer.into_vec();
     assert_eq!(buffer_result_1[0], 128);
     assert_eq!(buffer_result_1[1], 1);
 
