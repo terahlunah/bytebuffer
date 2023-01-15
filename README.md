@@ -6,7 +6,7 @@
 [![docs.rs](https://img.shields.io/badge/docs-latest-blue.svg)](https://docs.rs/bytebuffer)
 [![CI Checks](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/terahlunah/bytebuffer/actions/workflows/rust.yml)
 
-This crate provides an easy to use api to read / write data from / to a bunch of bytes.
+This crate provides an easy to use api to read/write data from/to a bunch of bytes.
 
 ```
 [dependencies]
