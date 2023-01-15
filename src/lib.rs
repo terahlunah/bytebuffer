@@ -24,6 +24,12 @@ pub struct ByteBuffer {
     endian: Endian,
 }
 
+impl From<&[u8]> for ByteBuffer {
+    fn from(val: &[u8]) -> Self {
+        ByteBuffer::from_bytes(val)
+    }
+}
+
 impl From<Vec<u8>> for ByteBuffer {
     fn from(val: Vec<u8>) -> Self {
         ByteBuffer::from_vec(val)
