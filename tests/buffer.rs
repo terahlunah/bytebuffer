@@ -435,7 +435,7 @@ overread_tests! {
 }
 
 #[test]
-fn test_issue_15_multiple_write_bits() {
+fn test_multiple_write_bits() {
     let mut bytes = ByteBuffer::new();
     bytes.write_bits(0x7, 3);
     bytes.write_bits(7, 4);
