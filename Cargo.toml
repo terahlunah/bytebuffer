@@ -1,6 +1,6 @@
 [package]
 name = "bytebuffer"
-version = "2.1.0"
+version = "2.1.1"
 authors = ["Terah <terah.dev@gmail.com>", "Shiroy <awacheux.utc@gmail.com>"]
 description = "A bytebuffer for networking and binary protocols"
 homepage = "https://github.com/terahlunah/bytebuffer"
