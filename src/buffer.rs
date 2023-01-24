@@ -688,8 +688,6 @@ impl ByteBuffer {
         if n > 0 {
             self.write_bit((value >> (n - 1)) & 1 != 0);
             self.write_bits(value, n - 1);
-        } else {
-            self.write_bit((value & 1) != 0);
         }
     }
 }

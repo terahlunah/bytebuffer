@@ -433,3 +433,20 @@ overread_tests! {
     overread_bit: ByteBuffer::new().read_bit(),
     overread_bits: ByteBuffer::new().read_bits(1),
 }
+
+#[test]
+fn test_issue_15_multiple_write_bits() {
+    let mut bytes = ByteBuffer::new();
+    bytes.write_bits(0x7, 3);
+    bytes.write_bits(7, 4);
+
+    assert_eq!(bytes.to_hex_dump(), "0xee");
+
+    let mut bytes = ByteBuffer::new();
+    bytes.write_u8(0x2);
+    bytes.write_u16(0);
+    bytes.write_bits(0x4, 3);
+    bytes.write_bits(7, 5);
+
+    assert_eq!(bytes.to_hex_dump(), "0x02 0x00 0x00 0x87");
+}
