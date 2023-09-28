@@ -697,7 +697,6 @@ impl ByteBuffer {
     /// Read a 16 bits floating point value, or return an IO error if not enough bytes are available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_f16(&mut self) -> Result<half::f16> {
-
         let offset = 2;
 
         self.flush_bits();
@@ -710,7 +709,9 @@ impl ByteBuffer {
         let range = self.rpos..self.rpos + offset;
         self.rpos += offset;
 
-        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+        let bytes: [u8; 2] = self.data[range]
+            .try_into()
+            .expect("range should always be 2");
 
         Ok(match self.endian {
             Endian::BigEndian => half::f16::from_be_bytes(bytes),
@@ -738,7 +739,6 @@ impl ByteBuffer {
     /// Read a truncated 16 bits floating point value, or return an IO error if not enough bytes are available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_bf16(&mut self) -> Result<half::bf16> {
-
         let offset = 2;
 
         self.flush_bits();
@@ -751,7 +751,9 @@ impl ByteBuffer {
         let range = self.rpos..self.rpos + offset;
         self.rpos += offset;
 
-        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+        let bytes: [u8; 2] = self.data[range]
+            .try_into()
+            .expect("range should always be 2");
 
         Ok(match self.endian {
             Endian::BigEndian => half::bf16::from_be_bytes(bytes),
