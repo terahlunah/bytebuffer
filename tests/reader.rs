@@ -4,7 +4,7 @@ use std::io::ErrorKind;
 #[test]
 fn test_api() {
     let mut buffer = ByteBuffer::new();
-    buffer.write_bytes(&vec![0x1, 0xFF, 0x45]);
+    buffer.write_bytes(&[0x1, 0xFF, 0x45]);
     buffer.write_u8(1);
     buffer.write_i8(1);
     buffer.write_u16(1);
@@ -49,10 +49,10 @@ fn test_api() {
 fn test_empty() {
     let mut buffer = ByteBuffer::new();
     let reader = ByteReader::from(buffer.as_bytes());
-    assert_eq!(reader.is_empty(), true);
+    assert!(reader.is_empty());
     buffer.write_u8(1);
     let reader = ByteReader::from(buffer.as_bytes());
-    assert_eq!(reader.is_empty(), false);
+    assert!(!reader.is_empty());
 }
 
 #[test]
@@ -261,9 +261,9 @@ fn test_read_bit() {
     let data = vec![128];
     let mut reader = ByteReader::from_bytes(&data);
     let bit1 = reader.read_bit().unwrap();
-    assert_eq!(bit1, true);
+    assert!(bit1);
     let bit2 = reader.read_bit().unwrap();
-    assert_eq!(bit2, false);
+    assert!(!bit2);
 }
 
 #[test]
@@ -300,7 +300,7 @@ fn test_flush_bit() {
     let bit = reader.read_bit().unwrap();
     let number = reader.read_i8().unwrap();
 
-    assert_eq!(bit, true);
+    assert!(bit);
     assert_eq!(number, 1);
 }
 
@@ -314,7 +314,7 @@ fn test_flush_bits() {
      * 11111111 | 00000001
      *  ^
      */
-    assert_eq!(bit1, true);
+    assert!(bit1);
     assert_eq!(rpos1, 0);
 
     reader.flush_bits();
@@ -325,7 +325,7 @@ fn test_flush_bits() {
      * 11111111 | 00000001
      *             ^
      */
-    assert_eq!(bit2, false);
+    assert!(!bit2);
     assert_eq!(rpos2, 1)
 }
 

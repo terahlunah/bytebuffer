@@ -4,7 +4,7 @@ use std::io::{ErrorKind, Read, Write};
 #[test]
 fn test_api() {
     let mut buffer = ByteBuffer::new();
-    buffer.write_bytes(&vec![0x1, 0xFF, 0x45]);
+    buffer.write_bytes(&[0x1, 0xFF, 0x45]);
     buffer.write_u8(1);
     buffer.write_i8(1);
     buffer.write_u16(1);
@@ -50,9 +50,9 @@ fn test_api() {
 #[test]
 fn test_empty() {
     let mut buffer = ByteBuffer::new();
-    assert_eq!(buffer.is_empty(), true);
+    assert!(buffer.is_empty());
     buffer.write_u8(1);
-    assert_eq!(buffer.is_empty(), false);
+    assert!(!buffer.is_empty());
 }
 
 #[test]
@@ -240,17 +240,17 @@ fn test_to_bytes() {
 
 #[test]
 fn test_from_bytes() {
-    let mut buffer = ByteBuffer::from_bytes(&vec![1, 2]);
+    let mut buffer = ByteBuffer::from_bytes(&[1, 2]);
     assert_eq!(buffer.read_u8().unwrap() + buffer.read_u8().unwrap(), 3);
 }
 
 #[test]
 fn test_read_bit() {
-    let mut buffer = ByteBuffer::from_bytes(&vec![128]);
+    let mut buffer = ByteBuffer::from_bytes(&[128]);
     let bit1 = buffer.read_bit().unwrap();
-    assert_eq!(bit1, true);
+    assert!(bit1);
     let bit2 = buffer.read_bit().unwrap();
-    assert_eq!(bit2, false);
+    assert!(!bit2);
 }
 
 #[test]
@@ -264,14 +264,14 @@ fn test_cannot_read_bit_outside_data() {
 
 #[test]
 fn test_read_bits() {
-    let mut buffer = ByteBuffer::from_bytes(&vec![128]);
+    let mut buffer = ByteBuffer::from_bytes(&[128]);
     let value = buffer.read_bits(3).unwrap();
     assert_eq!(value, 4);
 }
 
 #[test]
 fn test_cannot_read_more_than_64_bits() {
-    let mut buffer = ByteBuffer::from_bytes(&vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    let mut buffer = ByteBuffer::from_bytes(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     let result = buffer.read_bits(73);
     assert!(result.is_err());
     let error = result.err().unwrap();
@@ -304,24 +304,24 @@ fn test_flush_bit() {
     assert_eq!(buffer_result_1[0], 128);
     assert_eq!(buffer_result_1[1], 1);
 
-    let mut buffer2 = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
+    let mut buffer2 = ByteBuffer::from_bytes(&[0xFF, 0x01]);
     let bit1 = buffer2.read_bit().unwrap();
     let number1 = buffer2.read_i8().unwrap();
 
-    assert_eq!(bit1, true);
+    assert!(bit1);
     assert_eq!(number1, 1);
 }
 
 #[test]
 fn test_flush_bits() {
-    let mut buffer = ByteBuffer::from_bytes(&vec![0xFF, 0x01]);
+    let mut buffer = ByteBuffer::from_bytes(&[0xFF, 0x01]);
     let bit1 = buffer.read_bit().unwrap();
     let rpos1 = buffer.get_rpos();
     /*
      * 11111111 | 00000001
      *  ^
      */
-    assert_eq!(bit1, true);
+    assert!(bit1);
     assert_eq!(rpos1, 0);
 
     buffer.flush_bits();
@@ -332,7 +332,7 @@ fn test_flush_bits() {
      * 11111111 | 00000001
      *             ^
      */
-    assert_eq!(bit2, false);
+    assert!(!bit2);
     assert_eq!(rpos2, 1)
 }
 
@@ -341,7 +341,7 @@ fn test_read_empty_buffer() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
     let mut res = [];
-    buffer.read(&mut res).unwrap();
+    buffer.read_exact(&mut res).unwrap();
 }
 
 #[test]
@@ -349,7 +349,7 @@ fn test_read_exact_buffer() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
     let mut res = [0; 1];
-    buffer.read(&mut res).unwrap();
+    buffer.read_exact(&mut res).unwrap();
     assert_eq!(res[0], 0xFF);
 }
 
@@ -358,9 +358,10 @@ fn test_read_larger_buffer() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
     let mut res = [0; 2];
-    buffer.read(&mut res).unwrap();
+    let read = buffer.read(&mut res).unwrap();
     assert_eq!(res[0], 0xFF);
     assert_eq!(res[1], 0);
+    assert_eq!(read, 1);
 }
 
 #[test]
@@ -368,9 +369,11 @@ fn test_read_larger_buffer_twice() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u8(0xFF);
     let mut res = [0; 2];
-    buffer.read(&mut res).unwrap();
+    let read = buffer.read(&mut res).unwrap();
+    assert_eq!(read, 1);
     // Check for overflow on second read
-    buffer.read(&mut res).unwrap();
+    let read = buffer.read(&mut res).unwrap();
+    assert_eq!(read, 0);
     assert_eq!(res[0], 0xFF);
     assert_eq!(res[1], 0);
 }
@@ -378,7 +381,7 @@ fn test_read_larger_buffer_twice() {
 #[test]
 fn test_write() {
     let mut buffer = ByteBuffer::new();
-    buffer.write(&[0x1, 0xFF, 0x45]).unwrap();
+    buffer.write_all(&[0x1, 0xFF, 0x45]).unwrap();
     assert_eq!(buffer.read_bytes(3).unwrap(), &[0x1, 0xFF, 0x45]);
 }
 
