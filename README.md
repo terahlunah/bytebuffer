@@ -10,7 +10,7 @@ This crate provides an easy to use api to read/write data from/to a bunch of byt
 
 ```
 [dependencies]
-bytebuffer = "2.1.0"
+bytebuffer = "2.2.0"
 ```
 
 ---
@@ -64,7 +64,7 @@ let _ = reader.read_bit();
 let _ = reader.read_bits(3);
 ```
 
-Also support [crate half](https://crates.io/crates/half/) 16 bits floats with
+Also support [half](https://crates.io/crates/half/) 16 bits floats with
 ```rust
 features = ["half"]
 ```
