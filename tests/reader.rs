@@ -13,6 +13,10 @@ fn test_api() {
     buffer.write_i32(1);
     buffer.write_u64(1);
     buffer.write_i64(1);
+    if cfg!(feature = "half") {
+        buffer.write_bf16(half::bf16::from_f32(12.5));
+        buffer.write_f16(half::f16::from_f32(12.5));
+    }
     buffer.write_f32(0.1);
     buffer.write_f64(0.1);
     buffer.write_string("Hello");
@@ -30,6 +34,10 @@ fn test_api() {
     let _ = reader.read_i32();
     let _ = reader.read_u64();
     let _ = reader.read_i64();
+    if cfg!(feature = "half") {
+        let _ = reader.read_bf16();
+        let _ = reader.read_f16();
+    }
     let _ = reader.read_f32();
     let _ = reader.read_f64();
     let _ = reader.read_string();
@@ -138,6 +146,46 @@ fn test_signed_little_endian() {
     let mut reader = ByteReader::from(buffer.as_bytes());
     reader.set_endian(Endian::LittleEndian);
     assert_eq!(reader.read_u8().unwrap(), 0xFF);
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_f16() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_f16(half::f16::from_f32(0.1));
+    let mut reader = ByteReader::from(buffer.as_bytes());
+    assert_eq!(reader.read_f16().unwrap(), half::f16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_f16_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_f16(half::f16::from_f32(0.1));
+    let mut reader = ByteReader::from(buffer.as_bytes());
+    reader.set_endian(Endian::LittleEndian);
+    assert_eq!(reader.read_f16().unwrap(), half::f16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_bf16() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_bf16(half::bf16::from_f32(0.1));
+    let mut reader = ByteReader::from(buffer.as_bytes());
+    assert_eq!(reader.read_bf16().unwrap(), half::bf16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_bf16_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_bf16(half::bf16::from_f32(0.1));
+    let mut reader = ByteReader::from(buffer.as_bytes());
+    reader.set_endian(Endian::LittleEndian);
+    assert_eq!(reader.read_bf16().unwrap(), half::bf16::from_f32(0.1));
 }
 
 #[test]

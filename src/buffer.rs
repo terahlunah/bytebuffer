@@ -691,3 +691,88 @@ impl ByteBuffer {
         }
     }
 }
+
+#[cfg(feature = "half")]
+impl ByteBuffer {
+    /// Read a 16 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_f16(&mut self) -> Result<half::f16> {
+
+        let offset = 2;
+
+        self.flush_bits();
+        if self.rpos + offset > self.data.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
+        }
+        let range = self.rpos..self.rpos + offset;
+        self.rpos += offset;
+
+        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+
+        Ok(match self.endian {
+            Endian::BigEndian => half::f16::from_be_bytes(bytes),
+            Endian::LittleEndian => half::f16::from_le_bytes(bytes),
+        })
+    }
+
+    /// Append a 16 bits floating point number to the buffer.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// #  use bytebuffer::*;
+    /// let mut buffer = ByteBuffer::new();
+    /// buffer.write_f16(half::f16::from_f32(0.1))
+    /// ```
+    pub fn write_f16(&mut self, val: half::f16) {
+        match self.endian {
+            Endian::BigEndian => self.write_bytes(&val.to_be_bytes()),
+            Endian::LittleEndian => self.write_bytes(&val.to_le_bytes()),
+        };
+    }
+
+    /// Read a truncated 16 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_bf16(&mut self) -> Result<half::bf16> {
+
+        let offset = 2;
+
+        self.flush_bits();
+        if self.rpos + offset > self.data.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
+        }
+        let range = self.rpos..self.rpos + offset;
+        self.rpos += offset;
+
+        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+
+        Ok(match self.endian {
+            Endian::BigEndian => half::bf16::from_be_bytes(bytes),
+            Endian::LittleEndian => half::bf16::from_le_bytes(bytes),
+        })
+    }
+
+    /// Append a truncated 16 bits floating point number to the buffer.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// #  use bytebuffer::*;
+    /// let mut buffer = ByteBuffer::new();
+    /// buffer.write_bf16(half::bf16::from_f32(0.1))
+    /// ```
+    pub fn write_bf16(&mut self, val: half::bf16) {
+        match self.endian {
+            Endian::BigEndian => self.write_bytes(&val.to_be_bytes()),
+            Endian::LittleEndian => self.write_bytes(&val.to_le_bytes()),
+        };
+    }
+}

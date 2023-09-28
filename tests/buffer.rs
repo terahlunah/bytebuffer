@@ -13,6 +13,10 @@ fn test_api() {
     buffer.write_i32(1);
     buffer.write_u64(1);
     buffer.write_i64(1);
+    if cfg!(feature = "half") {
+        buffer.write_bf16(half::bf16::from_f32(12.5));
+        buffer.write_f16(half::f16::from_f32(12.5));
+    }
     buffer.write_f32(0.1);
     buffer.write_f64(0.1);
     buffer.write_string("Hello");
@@ -32,6 +36,10 @@ fn test_api() {
     let _ = buffer.read_i32();
     let _ = buffer.read_u64();
     let _ = buffer.read_i64();
+    if cfg!(feature = "half") {
+        let _ = buffer.read_bf16();
+        let _ = buffer.read_f16();
+    }
     let _ = buffer.read_f32();
     let _ = buffer.read_f64();
     let _ = buffer.read_string();
@@ -161,6 +169,40 @@ fn test_to_string() {
         buffer.to_hex_dump(),
         "0x00 0x00 0x00 0x05 0x68 0x65 0x6c 0x6c 0x6f"
     );
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_f16() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_f16(half::f16::from_f32(0.1));
+    assert_eq!(buffer.read_f16().unwrap(), half::f16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_f16_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_f16(half::f16::from_f32(0.1));
+    assert_eq!(buffer.read_f16().unwrap(), half::f16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_bf16() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_bf16(half::bf16::from_f32(0.1));
+    assert_eq!(buffer.read_bf16().unwrap(), half::bf16::from_f32(0.1));
+}
+
+#[test]
+#[cfg(feature = "half")]
+fn test_bf16_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_bf16(half::bf16::from_f32(0.1));
+    assert_eq!(buffer.read_bf16().unwrap(), half::bf16::from_f32(0.1));
 }
 
 #[test]

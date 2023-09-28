@@ -366,3 +366,54 @@ impl<'a> ByteReader<'a> {
         self.rbit = 0
     }
 }
+
+#[cfg(feature = "half")]
+impl ByteReader<'_> {
+    /// Read a 16 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_f16(&mut self) -> Result<half::f16> {
+
+        let offset = 2;
+
+        self.flush_bits();
+        if self.rpos + offset > self.data.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
+        }
+        let range = self.rpos..self.rpos + offset;
+        self.rpos += offset;
+
+        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+
+        Ok(match self.endian {
+            Endian::BigEndian => half::f16::from_be_bytes(bytes),
+            Endian::LittleEndian => half::f16::from_le_bytes(bytes),
+        })
+    }
+
+    /// Read a truncated 16 bits floating point value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_bf16(&mut self) -> Result<half::bf16> {
+
+        let offset = 2;
+
+        self.flush_bits();
+        if self.rpos + offset > self.data.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "could not read enough bits from buffer",
+            ));
+        }
+        let range = self.rpos..self.rpos + offset;
+        self.rpos += offset;
+
+        let bytes: [u8; 2] = self.data[range].try_into().expect("range should always be 2");
+
+        Ok(match self.endian {
+            Endian::BigEndian => half::bf16::from_be_bytes(bytes),
+            Endian::LittleEndian => half::bf16::from_le_bytes(bytes),
+        })
+    }
+}

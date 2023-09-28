@@ -64,6 +64,11 @@ let _ = reader.read_bit();
 let _ = reader.read_bits(3);
 ```
 
+Also support [crate half](https://crates.io/crates/half/) 16 bits floats with
+```rust
+features = ["half"]
+```
+
 ---
 
 ### License
