@@ -24,8 +24,8 @@ jobs:
     - name: Build
       run: cargo build
     - name: Tests
-      run: cargo test
+      run: cargo test --all-features
     - name: Rustfmt
       run: cargo fmt --all -- --check
     - name: Clippy
-      run: cargo clippy
+      run: cargo clippy --all-targets --all-features
