@@ -248,7 +248,7 @@ impl<'a> ByteReader<'a> {
     pub fn read_i128(&mut self) -> Result<i128> {
         Ok(self.read_u128()? as i128)
     }
-    
+
     /// Read a 32 bits floating point value, or return an IO error if not enough bytes are available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_f32(&mut self) -> Result<f32> {

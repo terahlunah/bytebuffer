@@ -508,7 +508,7 @@ impl ByteBuffer {
     pub fn read_i64(&mut self) -> Result<i64> {
         Ok(self.read_u64()? as i64)
     }
-    
+
     /// Read a sixteen bytes long value, or return an IO error if not enough bytes are available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///

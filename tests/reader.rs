@@ -139,7 +139,10 @@ fn test_u128() {
     let mut buffer = ByteBuffer::new();
     buffer.write_u128(0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
     let mut reader = ByteReader::from(buffer.as_bytes());
-    assert_eq!(reader.read_u128().unwrap(), 0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
+    assert_eq!(
+        reader.read_u128().unwrap(),
+        0xF0E1D2C3B4A59687F7E6D5C4B3A29180
+    );
 }
 
 #[test]
@@ -149,7 +152,10 @@ fn test_u128_little_endian() {
     buffer.write_u128(0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
     let mut reader = ByteReader::from(buffer.as_bytes());
     reader.set_endian(Endian::LittleEndian);
-    assert_eq!(reader.read_u128().unwrap(), 0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
+    assert_eq!(
+        reader.read_u128().unwrap(),
+        0xF0E1D2C3B4A59687F7E6D5C4B3A29180
+    );
 }
 
 #[test]
