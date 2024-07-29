@@ -1,6 +1,6 @@
 [package]
 name = "bytebuffer"
-version = "2.2.0"
+version = "2.3.0"
 authors = ["Terah <terah.dev@gmail.com>", "Shiroy <awacheux.utc@gmail.com>"]
 description = "A bytebuffer for networking and binary protocols"
 homepage = "https://github.com/terahlunah/bytebuffer"
@@ -17,5 +17,5 @@ default = []
 half = ["dep:half"]
 
 [dependencies]
-byteorder = "1"
-half = { version = "2.3.1", optional = true }
+byteorder = "1.5.0"
+half = { version = "2.4.1", optional = true }
