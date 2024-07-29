@@ -291,7 +291,7 @@ impl ByteBuffer {
         self.write_u32(val as u32);
     }
 
-    /// Append a quaddruple word (64 bits value) to the buffer
+    /// Append a quad word (64 bits value) to the buffer
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     ///
     /// #Example
@@ -315,6 +315,32 @@ impl ByteBuffer {
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn write_i64(&mut self, val: i64) {
         self.write_u64(val as u64);
+    }
+
+    /// Append an octo word (128 bits value) to the buffer
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// #  use bytebuffer::*;
+    /// let mut buffer = ByteBuffer::new();
+    /// buffer.write_u128(1) // buffer contains [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1] if little endian
+    /// ```
+    pub fn write_u128(&mut self, val: u128) {
+        let mut buf = [0; 16];
+        match self.endian {
+            Endian::BigEndian => BigEndian::write_u128(&mut buf, val),
+            Endian::LittleEndian => LittleEndian::write_u128(&mut buf, val),
+        };
+
+        self.write_bytes(&buf);
+    }
+
+    /// Same as `write_u128()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn write_i128(&mut self, val: i128) {
+        self.write_u128(val as u128);
     }
 
     /// Append a 32 bits floating point number to the buffer.
@@ -481,6 +507,26 @@ impl ByteBuffer {
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_i64(&mut self) -> Result<i64> {
         Ok(self.read_u64()? as i64)
+    }
+    
+    /// Read a sixteen bytes long value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// #  use bytebuffer::*;
+    /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1]);
+    /// let value = buffer.read_u128().unwrap(); //Value contains 1
+    /// ```
+    pub fn read_u128(&mut self) -> Result<u128> {
+        read_number!(self, read_u128, 16)
+    }
+
+    /// Same as `read_u128()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_i128(&mut self) -> Result<i128> {
+        Ok(self.read_u128()? as i128)
     }
 
     /// Read a 32 bits floating point value, or return an IO error if not enough bytes are available.

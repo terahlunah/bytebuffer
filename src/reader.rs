@@ -229,6 +229,26 @@ impl<'a> ByteReader<'a> {
         Ok(self.read_u64()? as i64)
     }
 
+    /// Read a sixteen bytes long value, or return an IO error if not enough bytes are available.
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    ///
+    /// #Example
+    ///
+    /// ```
+    /// #  use bytebuffer::*;
+    /// let mut buffer = ByteBuffer::from_bytes(&vec![0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1]);
+    /// let value = buffer.read_u128().unwrap(); //Value contains 1
+    /// ```
+    pub fn read_u128(&mut self) -> Result<u128> {
+        read_number!(self, read_u128, 16)
+    }
+
+    /// Same as `read_u128()` but for signed values
+    /// _Note_: This method resets the read and write cursor for bitwise reading.
+    pub fn read_i128(&mut self) -> Result<i128> {
+        Ok(self.read_u128()? as i128)
+    }
+    
     /// Read a 32 bits floating point value, or return an IO error if not enough bytes are available.
     /// _Note_: This method resets the read and write cursor for bitwise reading.
     pub fn read_f32(&mut self) -> Result<f32> {

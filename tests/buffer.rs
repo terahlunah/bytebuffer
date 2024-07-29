@@ -13,6 +13,8 @@ fn test_api() {
     buffer.write_i32(1);
     buffer.write_u64(1);
     buffer.write_i64(1);
+    buffer.write_u128(1);
+    buffer.write_i128(1);
     if cfg!(feature = "half") {
         buffer.write_bf16(half::bf16::from_f32(12.5));
         buffer.write_f16(half::f16::from_f32(12.5));
@@ -36,6 +38,8 @@ fn test_api() {
     let _ = buffer.read_i32();
     let _ = buffer.read_u64();
     let _ = buffer.read_i64();
+    let _ = buffer.read_u128();
+    let _ = buffer.read_i128();
     if cfg!(feature = "half") {
         let _ = buffer.read_bf16();
         let _ = buffer.read_f16();
@@ -115,6 +119,21 @@ fn test_u64_little_endian() {
     buffer.set_endian(Endian::LittleEndian);
     buffer.write_u64(0xF0E1D2C3B4A59687);
     assert_eq!(buffer.read_u64().unwrap(), 0xF0E1D2C3B4A59687);
+}
+
+#[test]
+fn test_u128() {
+    let mut buffer = ByteBuffer::new();
+    buffer.write_u128(0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
+    assert_eq!(buffer.read_u128().unwrap(), 0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
+}
+
+#[test]
+fn test_u128_little_endian() {
+    let mut buffer = ByteBuffer::new();
+    buffer.set_endian(Endian::LittleEndian);
+    buffer.write_u128(0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
+    assert_eq!(buffer.read_u128().unwrap(), 0xF0E1D2C3B4A59687F7E6D5C4B3A29180);
 }
 
 #[test]
@@ -473,6 +492,8 @@ overread_tests! {
     overread_i32: ByteBuffer::new().read_i32(),
     overread_u64: ByteBuffer::new().read_u64(),
     overread_i64: ByteBuffer::new().read_i64(),
+    overread_u128: ByteBuffer::new().read_u128(),
+    overread_i128: ByteBuffer::new().read_i128(),
     overread_f32: ByteBuffer::new().read_f32(),
     overread_f64: ByteBuffer::new().read_f64(),
     overread_bit: ByteBuffer::new().read_bit(),
